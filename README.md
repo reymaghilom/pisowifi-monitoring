@@ -22,15 +22,15 @@ The system allows me to check whether my machines are **Online (Reachable)** or 
 
 | My PisoWiFi | Machine Details |
 |---|---|
-| ![My PisoWiFi](screenshots/my-pisowifi.png) | ![Machine Details](screenshots/machine-details.png) |
+| ![My PisoWiFi](screenshots/my pisowifi.png) | ![Machine Details](screenshots/machine details.png) |
 
 | Add PisoWiFi Machine | Remote Administration |
 |---|---|
-| ![Add Machine](screenshots/add-machine.png) | ![Remote Administration](screenshots/remote-administration.png) |
+| ![Add Machine](screenshots/add machine.png) | ![Remote Administration](screenshots/remote administration.png) |
 
 | Remote Admin Access | Settings |
 |---|---|
-| ![Remote Admin Access](screenshots/remote-admin-access.png) | ![Settings](screenshots/settings.png) |
+| ![Remote Admin Access](screenshots/remote admin.png) | ![Settings](screenshots/settings.png) |
 
 ## Tech Stack
 
