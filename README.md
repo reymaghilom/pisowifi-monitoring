@@ -18,7 +18,7 @@ The system allows me to check whether my machines are **Online (Reachable)** or 
 
 | Login Page | Dashboard |
 |---|---|
-| ![Login Page](screenshots/login.png) | ![Dashboard](screenshots/dashboard.png) |
+| ![Login Page](screenshots/login page.png) | ![Dashboard](screenshots/dashboard.png) |
 
 | My PisoWiFi | Machine Details |
 |---|---|
