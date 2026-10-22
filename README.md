@@ -14,6 +14,24 @@ The system allows me to check whether my machines are **Online (Reachable)** or 
 - **Cloud Hosting** – Hosted using Google Cloud Compute Engine (Ubuntu VPS).
 - **User Management** – Secure authentication and role-based access.
 
+## Screenshots
+
+| Login Page | Dashboard |
+|---|---|
+| ![Login Page](screenshots/login.png) | ![Dashboard](screenshots/dashboard.png) |
+
+| My PisoWiFi | Machine Details |
+|---|---|
+| ![My PisoWiFi](screenshots/my-pisowifi.png) | ![Machine Details](screenshots/machine-details.png) |
+
+| Add PisoWiFi Machine | Remote Administration |
+|---|---|
+| ![Add Machine](screenshots/add-machine.png) | ![Remote Administration](screenshots/remote-administration.png) |
+
+| Remote Admin Access | Settings |
+|---|---|
+| ![Remote Admin Access](screenshots/remote-admin-access.png) | ![Settings](screenshots/settings.png) |
+
 ## Tech Stack
 
 | Category | Technologies |
