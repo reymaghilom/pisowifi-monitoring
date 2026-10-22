@@ -30,7 +30,7 @@ The system allows me to check whether my machines are **Online (Reachable)** or 
 
 | Remote Admin Access | Settings |
 |---|---|
-| ![Remote Admin Access](screenshots/remote_admin.png) | ![Settings](screenshots/settings.png) |
+| ![Remote Admin Access](screenshots/remote-admin.png) | ![Settings](screenshots/settings.png) |
 
 ## Tech Stack
 
