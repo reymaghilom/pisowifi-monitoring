@@ -28,9 +28,9 @@ The system allows me to check whether my machines are **Online (Reachable)** or 
 |---|---|
 | ![Add Machine](screenshots/add-pisowifi-machine.png) | ![Remote Administration](screenshots/remote-adminatration.png) |
 
-| Remote Admin Access | Settings |
+| Monitoring History | Settings |
 |---|---|
-| ![Remote Admin Access](screenshots/remote-admin.png) | ![Settings](screenshots/settings.png) |
+| ![Remote Admin Access](screenshots/monitoring-history.png) | ![Settings](screenshots/settings.png) |
 
 ## Tech Stack
 
