@@ -1,0 +1,1273 @@
+{
+  "name": "PisoWiFi status notifications v4",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pisowifi-status",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "ipWhitelist": "127.0.0.1,::1,::ffff:127.0.0.1"
+        }
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "7a4c2e10-4d5b-4f86-9c31-5e0b00c0ffee",
+      "notes": "Header Auth credential 'PisoWiFi Webhook Auth': Name Authorization, Value 'Bearer <N8N_WEBHOOK_SECRET>'. Select it after import."
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "check",
+              "type": "object",
+              "value": "={{ (() => { const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/; const h = $json.headers ?? {}; const b = $json.body; const no = (reason) => ({ ok: false, reason }); if (!b || typeof b !== 'object' || Array.isArray(b)) return no('body'); const id = String(h['x-pisowifi-event-id'] ?? ''); if (!UUID.test(id)) return no('event_id_header'); if (String(b.eventId ?? '') !== id) return no('event_id_mismatch'); const ts = String(h['x-pisowifi-timestamp'] ?? ''); if (!/^[0-9]{10}$/.test(ts) || Math.abs(Date.now() / 1000 - Number(ts)) > 300) return no('timestamp'); const pair = b.event === 'machine.unreachable' ? ['Unreachable', 'Reachable'] : b.event === 'machine.reachable' ? ['Reachable', 'Unreachable'] : null; if (!pair) return no('event'); if (b.status !== pair[0] || b.previousStatus !== pair[1]) return no('transition'); const m = b.machine; if (!m || typeof m !== 'object' || Array.isArray(m)) return no('machine'); if (!UUID.test(String(m.id ?? ''))) return no('machine_id'); if (typeof m.name !== 'string' || m.name.trim() === '' || m.name.length > 120) return no('machine_name'); if (!/^[0-9]{1,3}([.][0-9]{1,3}){3}$/.test(String(m.ip ?? ''))) return no('machine_ip'); if (b.timeZone !== 'Asia/Manila' || b.utcOffset !== '+08:00') return no('time_zone'); const iso = String(b.detectedAt ?? ''); const at = DateTime.fromISO(iso, { zone: 'utc' }); if (!/Z$/.test(iso) || !at.isValid) return no('detected_at'); const age = Date.now() - at.toMillis(); if (age < -300000 || age > 604800000) return no('detected_at_range'); const local = at.setZone('Asia/Manila').setLocale('en-US'); if (b.detectedDate !== local.toFormat('MMMM d, yyyy') || b.detectedTime !== local.toFormat('h:mm a')) return no('detected_local'); const hasStart = b.outageStartedAt !== undefined && b.outageStartedAt !== null; const hasDown = b.downtimeSeconds !== undefined && b.downtimeSeconds !== null; if (hasStart !== hasDown) return no('downtime'); if (hasDown) { const s = b.downtimeSeconds; const o = DateTime.fromISO(String(b.outageStartedAt), { zone: 'utc' }); if (b.event !== 'machine.reachable' || !Number.isInteger(s) || s < 0 || !o.isValid || Math.abs(Math.floor((at.toMillis() - o.toMillis()) / 1000) - s) > 1) return no('downtime'); } const r = b.recipients; if (!Array.isArray(r) || r.length < 1 || r.length > 20) return no('recipients'); const seen = new Set(); for (const x of r) { if (!x || typeof x !== 'object' || !UUID.test(String(x.id ?? '')) || seen.has(x.id)) return no('recipients'); seen.add(x.id); const e = String(x.email ?? ''); if (e.length > 254 || !/^[^@\\s,;<>\"'()\\[\\]]+@[^@\\s,;<>\"'()\\[\\]]+[.][^@\\s,;<>\"'()\\[\\]]+$/.test(e)) return no('recipients'); } return { ok: true, reason: '' }; })() }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000002",
+      "name": "Validate",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "v1",
+              "leftValue": "={{ $json.check.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000003",
+      "name": "Valid Event?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'invalid', reason: $json.check.reason } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000004",
+      "name": "Respond Invalid",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        600,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_approved_machines"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": []
+        },
+        "returnAll": true
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000005",
+      "name": "Load Approved Machines",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        300
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_approved_recipients"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": []
+        },
+        "returnAll": true
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000006",
+      "name": "Load Approved Recipients",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        300
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_deliveries_v4"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000007",
+      "name": "Load Delivery State",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1000,
+        300
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_deliveries_v4"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "machine_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.body.machine.id }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000008",
+      "name": "Load Machine History",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        300
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "plan",
+              "type": "object",
+              "value": "={{ (() => { const EXPECTED_MACHINES = 2; const EXPECTED_RECIPIENTS = 3; const STALE_MS = 120000; const b = $('Webhook').first().json.body; const rows = (n) => $(n).all().map((i) => i.json).filter((r) => r && typeof r === 'object' && Object.keys(r).length > 0); const norm = (v) => String(v ?? '').trim().toLowerCase(); const machines = rows('Load Approved Machines').map((r) => norm(r.machine_id)).filter((v) => v !== ''); const people = rows('Load Approved Recipients').map((r) => norm(r.user_id)).filter((v) => v !== ''); const out = { decision: 'send', total: b.recipients.length, approved: 0, notApproved: 0, alreadySent: 0, inFlight: 0, toSend: [] }; if (machines.length !== EXPECTED_MACHINES || new Set(machines).size !== EXPECTED_MACHINES || people.length !== EXPECTED_RECIPIENTS || new Set(people).size !== EXPECTED_RECIPIENTS) return { ...out, decision: 'config_error' }; if (!machines.includes(norm(b.machine.id))) return { ...out, decision: 'machine_not_approved' }; const at = Date.parse(b.detectedAt); if (rows('Load Machine History').some((r) => r.status === 'sent' && r.event_id !== b.eventId && Date.parse(String(r.detected_at)) > at)) return { ...out, decision: 'superseded' }; const now = Date.now(); const st = {}; for (const r of rows('Load Delivery State')) { if (!r.recipient_id) continue; const s = st[r.recipient_id] ?? (st[r.recipient_id] = { sent: false, live: false }); if (r.status === 'sent') s.sent = true; if (r.status === 'sending' && now - Date.parse(String(r.attempted_at)) < STALE_MS) s.live = true; } for (const x of b.recipients) { if (!people.includes(norm(x.id))) { out.notApproved++; continue; } out.approved++; const s = st[x.id]; if (s && s.sent) { out.alreadySent++; continue; } if (s && s.live) { out.inFlight++; continue; } out.toSend.push({ recipientId: x.id, email: x.email }); } if (out.approved === 0) out.decision = 'no_approved_recipients'; else if (out.toSend.length === 0) out.decision = 'nothing'; return { ...out, staleMs: STALE_MS }; })() }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000009",
+      "name": "Plan",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1400,
+        300
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "s1",
+              "leftValue": "={{ $json.plan.decision === 'send' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000010",
+      "name": "Anything To Send?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: $json.plan.decision === 'nothing' ? ($json.plan.inFlight > 0 ? 'in_progress' : 'duplicate') : $json.plan.decision, sent: 0, failed: 0, alreadySent: $json.plan.alreadySent, inFlight: $json.plan.inFlight, notApproved: $json.plan.notApproved, total: $json.plan.total } }}",
+        "options": {
+          "responseCode": "={{ $json.plan.decision === 'nothing' ? ($json.plan.inFlight > 0 ? 503 : 200) : $json.plan.decision === 'superseded' ? 200 : $json.plan.decision === 'config_error' ? 503 : 422 }}"
+        }
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000011",
+      "name": "Respond Not Sent",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1800,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "subject",
+              "type": "string",
+              "value": "={{ (() => { const b = $('Webhook').first().json.body; const n = String(b.machine.name).replace(/[\\u0000-\\u001f\\u007f\\u2028\\u2029]+/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80); return b.event === 'machine.unreachable' ? '[PisoWiFi Alert] ' + n + ' is Offline' : '[PisoWiFi Recovery] ' + n + ' is Back Online'; })() }}"
+            },
+            {
+              "id": "a1",
+              "name": "text",
+              "type": "string",
+              "value": "={{ (() => { const b = $('Webhook').first().json.body; const n = String(b.machine.name).replace(/[\\u0000-\\u001f\\u007f\\u2028\\u2029]+/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80); const down = b.event === 'machine.unreachable'; const fmt = (s) => { if (s < 60) return 'less than 1 minute'; const m = Math.floor(s / 60); return [[Math.floor(m / 1440), 'day'], [Math.floor((m % 1440) / 60), 'hour'], [m % 60, 'minute']].filter((p) => p[0] > 0).map((p) => p[0] + ' ' + p[1] + (p[0] === 1 ? '' : 's')).join(' '); }; const lines = [down ? n + ' is Offline.' : n + ' is Back Online.', '', 'Machine: ' + n, 'Previous Status: ' + (down ? 'Online' : 'Offline'), 'Current Status: ' + (down ? 'Offline' : 'Online'), (down ? 'Detected: ' : 'Recovered: ') + b.detectedDate + ', ' + b.detectedTime + ' (Asia/Manila)']; if (!down && Number.isInteger(b.downtimeSeconds)) lines.push('Downtime: ' + fmt(b.downtimeSeconds)); lines.push('', 'Event ID: ' + b.eventId); return lines.join('\\n'); })() }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000012",
+      "name": "Compose",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1800,
+        300
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "plan.toSend",
+        "include": "noOtherFields",
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000013",
+      "name": "Split Recipients",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000014",
+      "name": "Each Recipient",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_deliveries_v4"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}",
+            "recipient_id": "={{ $('Each Recipient').first().json.recipientId }}",
+            "machine_id": "={{ $('Webhook').first().json.body.machine.id }}",
+            "event": "={{ $('Webhook').first().json.body.event }}",
+            "detected_at": "={{ $('Webhook').first().json.body.detectedAt }}",
+            "status": "sending",
+            "run_token": "={{ $execution.id }}",
+            "attempted_at": "={{ $now.toUTC().toISO() }}",
+            "sent_at": ""
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recipient_id",
+              "displayName": "recipient_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "machine_id",
+              "displayName": "machine_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "detected_at",
+              "displayName": "detected_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "run_token",
+              "displayName": "run_token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "attempted_at",
+              "displayName": "attempted_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "sent_at",
+              "displayName": "sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000015",
+      "name": "Reserve",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_deliveries_v4"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}"
+            },
+            {
+              "keyName": "recipient_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Each Recipient').first().json.recipientId }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000016",
+      "name": "Confirm Reservation",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2600,
+        100
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "r1",
+              "leftValue": "={{ (() => { const STALE_MS = $('Plan').first().json.plan.staleMs; const now = Date.now(); const rows = $('Confirm Reservation').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.id !== null); if (rows.some((r) => r.status === 'sent')) return false; const live = rows.filter((r) => r.status === 'sending' && now - Date.parse(String(r.attempted_at)) < STALE_MS); const mine = live.find((r) => String(r.run_token) === String($execution.id)); return mine !== undefined && live.every((r) => Number(r.id) >= Number(mine.id)); })() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000017",
+      "name": "Still Ours?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2800,
+        100
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $('Each Recipient').first().json.email }}",
+        "subject": "={{ $('Compose').first().json.subject }}",
+        "emailType": "text",
+        "message": "={{ $('Compose').first().json.text }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "PisoWiFi Monitoring"
+        }
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000018",
+      "name": "Send Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3000,
+        0
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "Credential: Gmail OAuth2 for pisowifimonitoring@gmail.com (scope gmail.send). Not set in this file; select it after import."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_deliveries_v4"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}"
+            },
+            {
+              "keyName": "recipient_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Each Recipient').first().json.recipientId }}"
+            },
+            {
+              "keyName": "run_token",
+              "condition": "eq",
+              "keyValue": "={{ $execution.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}",
+            "recipient_id": "={{ $('Each Recipient').first().json.recipientId }}",
+            "machine_id": "={{ $('Webhook').first().json.body.machine.id }}",
+            "event": "={{ $('Webhook').first().json.body.event }}",
+            "detected_at": "={{ $('Webhook').first().json.body.detectedAt }}",
+            "status": "sent",
+            "sent_at": "={{ $now.toUTC().toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recipient_id",
+              "displayName": "recipient_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "machine_id",
+              "displayName": "machine_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "detected_at",
+              "displayName": "detected_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "sent_at",
+              "displayName": "sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000019",
+      "name": "Record Sent",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3200,
+        -100
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_deliveries_v4"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}"
+            },
+            {
+              "keyName": "recipient_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Each Recipient').first().json.recipientId }}"
+            },
+            {
+              "keyName": "run_token",
+              "condition": "eq",
+              "keyValue": "={{ $execution.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}",
+            "recipient_id": "={{ $('Each Recipient').first().json.recipientId }}",
+            "machine_id": "={{ $('Webhook').first().json.body.machine.id }}",
+            "event": "={{ $('Webhook').first().json.body.event }}",
+            "detected_at": "={{ $('Webhook').first().json.body.detectedAt }}",
+            "status": "failed"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recipient_id",
+              "displayName": "recipient_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "machine_id",
+              "displayName": "machine_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "detected_at",
+              "displayName": "detected_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000020",
+      "name": "Record Failed",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3200,
+        120
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "recipientId",
+              "type": "string",
+              "value": "={{ $('Each Recipient').first().json.recipientId }}"
+            },
+            {
+              "id": "a1",
+              "name": "outcome",
+              "type": "string",
+              "value": "sent"
+            },
+            {
+              "id": "a2",
+              "name": "recorded",
+              "type": "boolean",
+              "value": "={{ !$json.error }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000021",
+      "name": "Outcome Sent",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3400,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "recipientId",
+              "type": "string",
+              "value": "={{ $('Each Recipient').first().json.recipientId }}"
+            },
+            {
+              "id": "a1",
+              "name": "outcome",
+              "type": "string",
+              "value": "failed"
+            },
+            {
+              "id": "a2",
+              "name": "recorded",
+              "type": "boolean",
+              "value": "={{ !$json.error }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000022",
+      "name": "Outcome Failed",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3400,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "recipientId",
+              "type": "string",
+              "value": "={{ $('Each Recipient').first().json.recipientId }}"
+            },
+            {
+              "id": "a1",
+              "name": "outcome",
+              "type": "string",
+              "value": "deferred"
+            },
+            {
+              "id": "a2",
+              "name": "recorded",
+              "type": "boolean",
+              "value": "={{ true }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000023",
+      "name": "Outcome Deferred",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3000,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "summary",
+              "type": "object",
+              "value": "={{ (() => { const o = $input.all().map((i) => i.json); const p = $('Plan').first().json.plan; return { total: p.total, notApproved: p.notApproved, sent: o.filter((x) => x.outcome === 'sent').length, failed: o.filter((x) => x.outcome === 'failed').length, alreadySent: p.alreadySent, inFlight: p.inFlight + o.filter((x) => x.outcome === 'deferred').length, unrecorded: o.filter((x) => x.outcome === 'sent' && !x.recorded).length }; })() }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000024",
+      "name": "Summarize",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2400,
+        520
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: $json.summary.failed + $json.summary.inFlight > 0 ? 'partial' : 'sent', sent: $json.summary.sent, failed: $json.summary.failed, alreadySent: $json.summary.alreadySent, inFlight: $json.summary.inFlight, notApproved: $json.summary.notApproved, total: $json.summary.total } }}",
+        "options": {
+          "responseCode": "={{ $json.summary.failed + $json.summary.inFlight > 0 ? 503 : 200 }}"
+        }
+      },
+      "id": "7a4c2e10-4d5b-4f86-9c31-000000000025",
+      "name": "Respond Result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2600,
+        520
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate": {
+      "main": [
+        [
+          {
+            "node": "Valid Event?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid Event?": {
+      "main": [
+        [
+          {
+            "node": "Load Approved Machines",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Approved Machines": {
+      "main": [
+        [
+          {
+            "node": "Load Approved Recipients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Approved Recipients": {
+      "main": [
+        [
+          {
+            "node": "Load Delivery State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Delivery State": {
+      "main": [
+        [
+          {
+            "node": "Load Machine History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Machine History": {
+      "main": [
+        [
+          {
+            "node": "Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan": {
+      "main": [
+        [
+          {
+            "node": "Anything To Send?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything To Send?": {
+      "main": [
+        [
+          {
+            "node": "Compose",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Not Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose": {
+      "main": [
+        [
+          {
+            "node": "Split Recipients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Recipients": {
+      "main": [
+        [
+          {
+            "node": "Each Recipient",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Each Recipient": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reserve",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reserve": {
+      "main": [
+        [
+          {
+            "node": "Confirm Reservation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm Reservation": {
+      "main": [
+        [
+          {
+            "node": "Still Ours?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Still Ours?": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Outcome Deferred",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail": {
+      "main": [
+        [
+          {
+            "node": "Record Sent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Sent": {
+      "main": [
+        [
+          {
+            "node": "Outcome Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Failed": {
+      "main": [
+        [
+          {
+            "node": "Outcome Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outcome Sent": {
+      "main": [
+        [
+          {
+            "node": "Each Recipient",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outcome Failed": {
+      "main": [
+        [
+          {
+            "node": "Each Recipient",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outcome Deferred": {
+      "main": [
+        [
+          {
+            "node": "Each Recipient",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Respond Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Manila",
+    "executionTimeout": 25,
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "saveExecutionProgress": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "pisowifiTemplate": "status-notifications v4: approved machines/recipients tables, chronology guard, insert-ordered reservation, [PisoWiFi Alert]/[PisoWiFi Recovery] wording, downtime; credentials not set"
+  },
+  "pinData": {}
+}

@@ -1,0 +1,18 @@
+<!-- @dsCard group="Components" height=520 subtitle="Line, grouped bars, status strip — always labelled Sample" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<div id="r" style="padding:24px"></div>
+<script>
+const P=PisoWiFi,D=P.data;
+const strip=D.days.flatMap((d,i)=>[i==4||i==10?'bad':'ok','ok','ok',i==9?'warn':'ok']);
+document.getElementById('r').innerHTML=`<div class="pw-grid pw-g2" style="gap:16px">
+<div class="pw-card"><div class="pw-card-head"><h3 class="pw-h3">Uptime, 14 days</h3>${P.badge('sample')}</div>
+${P.line({labels:D.days,min:94,max:100,ticks:3,unit:'%',series:[{v:D.up1,cls:'l1',area:true},{v:D.up2,cls:'l2'}],alt:'Sample uptime lines'})}
+<div class="pw-legend" style="margin-top:8px"><span><i></i>PisoWiFi 01</span><span><i class="d2"></i>PisoWiFi 02 (dashed)</span></div></div>
+<div class="pw-card"><div class="pw-card-head"><h3 class="pw-h3">Outages per week</h3>${P.badge('sample')}</div>
+${P.bars({groups:[{label:'W1',a:2,b:5},{label:'W2',a:1,b:4},{label:'W3',a:3,b:6},{label:'W4',a:0,b:3}],max:8})}
+<div class="pw-legend" style="margin-top:8px"><span><i class="sq" style="background:var(--chart-1)"></i>PisoWiFi 01</span><span><i class="sq" style="background:var(--chart-2)"></i>PisoWiFi 02</span></div></div>
+<div class="pw-card" style="grid-column:1/-1"><div class="pw-card-head"><h3 class="pw-h3">Status timeline</h3>${P.badge('sample')}</div>
+${P.strip(strip)}
+<div class="pw-legend" style="margin-top:10px"><span><i class="sq" style="background:var(--success)"></i>Reachable</span><span><i class="sq" style="background:var(--warning)"></i>Stale</span><span><i class="sq" style="background:var(--danger)"></i>Unreachable</span><span><i class="sq" style="background:var(--border-strong)"></i>No data</span></div></div>
+</div>`;
+</script>

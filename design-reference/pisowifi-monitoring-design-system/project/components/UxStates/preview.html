@@ -1,0 +1,20 @@
+<!-- @dsCard group="Screens" height=1070 width=1200 subtitle="Loading, empty, error, stale, unauthorized, success" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<div id="r" style="padding:24px"></div>
+<script>
+const P=PisoWiFi,i=P.icon;
+const empty=(tone,ic,t,d,btn)=>`<div class="pw-empty"><span class="pw-empty-ic ${tone}">${i(ic,26)}</span><h3 class="pw-h2">${t}</h3><p class="pw-muted" style="max-width:340px">${d}</p>${btn||''}</div>`;
+const lab=t=>`<div class="pw-label" style="margin:0 0 8px">${t}</div>`;
+document.getElementById('r').innerHTML=`<div class="pw-grid pw-g3" style="gap:20px;align-items:start">
+<div>${lab('Skeleton loading')}<div class="pw-card pw-stack" style="gap:14px"><div class="pw-skel" style="width:40%;height:18px"></div><div class="pw-skel" style="height:34px;width:30%"></div><div class="pw-skel" style="height:120px"></div><div class="pw-skel" style="width:70%"></div></div></div>
+<div>${lab('Loading')}<div class="pw-card" style="display:grid;place-items:center;height:216px"><div class="pw-stack" style="align-items:center;gap:12px"><span class="pw-spin" style="width:28px;height:28px;color:var(--brand)"></span><span class="pw-muted">Loading demo data…</span></div></div></div>
+<div>${lab('No machines')}${empty('','server','No machines yet','Add your first PisoWiFi to start tracking it.',`<button class="pw-btn primary">${i('plus')}Add machine</button>`)}</div>
+<div>${lab('No history')}${empty('mute','history','No history yet','Checks will appear here after monitoring runs.')}</div>
+<div>${lab('Generic error')}${empty('bad','alert','Something went wrong','We couldn\'t load this page. Try again.',`<button class="pw-btn secondary">${i('refresh')}Try again</button>`)}</div>
+<div>${lab('Unauthorized')}${empty('bad','lock','You don\'t have access','Ask the owner to grant access to this area.',`<button class="pw-btn secondary">Back to dashboard</button>`)}</div>
+<div>${lab('Unreachable')}<div class="pw-banner bad">${i('x')}<div><strong>PisoWiFi 02 is unreachable.</strong> The last HTTP check failed 4 min ago.</div></div></div>
+<div>${lab('Stale')}<div class="pw-banner warn">${i('alert')}<div><strong>Data is stale.</strong> Last successful check 3 h ago; status may have changed.</div></div></div>
+<div>${lab('Success')}<div class="pw-banner ok">${i('check')}<div><strong>Settings saved.</strong> (Demo — nothing stored)</div></div></div>
+<div style="grid-column:1/-1">${lab('Delete confirmation')}<div class="pw-scrim"><div class="pw-modal"><h3 class="pw-h2">Delete PisoWiFi 02?</h3><p class="pw-muted">This removes the machine and its demo history. This can't be undone.</p><div class="pw-row" style="justify-content:flex-end"><button class="pw-btn secondary">Cancel</button><button class="pw-btn danger">Delete machine</button></div></div></div></div>
+</div>`;
+</script>

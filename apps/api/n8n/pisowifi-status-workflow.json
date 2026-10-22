@@ -1,0 +1,921 @@
+{
+  "name": "PisoWiFi status notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pisowifi-status",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "ipWhitelist": "127.0.0.1,::1,::ffff:127.0.0.1"
+        }
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "6d0f5a8e-2b7c-4f1e-9a3d-5c8e1f2a7b90",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_HEADER_AUTH_CREDENTIAL_ID",
+          "name": "PisoWiFi Webhook Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ String($json.headers['x-pisowifi-event-id'] ?? '') }}",
+              "rightValue": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ String($json.body?.eventId ?? '') === String($json.headers['x-pisowifi-event-id'] ?? '-') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c3",
+              "leftValue": "={{ String($json.body?.event ?? '') + '|' + String($json.body?.status ?? '') + '|' + String($json.body?.previousStatus ?? '') }}",
+              "rightValue": "^(machine\\.unreachable\\|Unreachable\\|Reachable|machine\\.reachable\\|Reachable\\|Unreachable)$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "c4",
+              "leftValue": "={{ String($json.body?.machine?.name ?? '').trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c5",
+              "leftValue": "={{ String($json.body?.machine?.ip ?? '') }}",
+              "rightValue": "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "c6",
+              "leftValue": "={{ String($json.body?.detectedDate ?? '') + ' ' + String($json.body?.detectedTime ?? '') }}",
+              "rightValue": "^[A-Z][a-z]+ \\d{1,2}, \\d{4} \\d{1,2}:\\d{2} (AM|PM)$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "c7",
+              "leftValue": "={{ (() => { const r = $json.body?.recipients; return Array.isArray(r) && r.length >= 1 && r.length <= 20 && r.every(x => x && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(String(x.id)) && /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(String(x.email)) && String(x.email).length <= 254) && new Set(r.map(x => x.id)).size === r.length; })() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000002",
+      "name": "Valid Event?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_deliveries"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').item.json.headers['x-pisowifi-event-id'] }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000003",
+      "name": "Load Delivery State",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        200
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "plan",
+              "type": "object",
+              "value": "={{ (() => { const STALE_MS = 120000; const now = Date.now(); const st = {}; for (const i of $('Load Delivery State').all()) { const r = i.json; if (r && r.recipient_id) st[r.recipient_id] = r; } const all = $('Webhook').first().json.body.recipients; const toSend = []; let alreadySent = 0, inFlight = 0; for (const x of all) { const r = st[x.id]; if (r && r.status === 'sent') { alreadySent++; continue; } if (r && r.status === 'sending' && now - Date.parse(r.attempted_at) < STALE_MS) { inFlight++; continue; } toSend.push({ recipientId: x.id, email: x.email }); } return { total: all.length, alreadySent, inFlight, toSend }; })() }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000004",
+      "name": "Plan",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        660,
+        200
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "s1",
+              "leftValue": "={{ $json.plan.toSend.length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000005",
+      "name": "Anything To Send?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "plan.toSend",
+        "include": "noOtherFields",
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000006",
+      "name": "Split Recipients",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000007",
+      "name": "Each Recipient",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1320,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_deliveries"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}"
+            },
+            {
+              "keyName": "recipient_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Each Recipient').first().json.recipientId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}",
+            "recipient_id": "={{ $('Each Recipient').first().json.recipientId }}",
+            "event": "={{ $('Webhook').first().json.body.event }}",
+            "status": "sending",
+            "attempted_at": "={{ $now.toUTC().toISO() }}",
+            "sent_at": ""
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recipient_id",
+              "displayName": "recipient_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "attempted_at",
+              "displayName": "attempted_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "sent_at",
+              "displayName": "sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000008",
+      "name": "Reserve",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1540,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $('Each Recipient').first().json.email }}",
+        "subject": "={{ (() => { const b = $('Webhook').first().json.body; const n = String(b.machine.name).replace(/[\\r\\n\\t]+/g, ' ').trim(); return b.event === 'machine.unreachable' ? 'PisoWiFi alert: ' + n + ' is Offline' : 'PisoWiFi: ' + n + ' is Back Online'; })() }}",
+        "emailType": "text",
+        "message": "={{ (() => { const b = $('Webhook').first().json.body; const n = String(b.machine.name).replace(/[\\r\\n\\t]+/g, ' ').trim(); const down = b.event === 'machine.unreachable'; return [down ? n + ' is Offline.' : n + ' is Back Online.', '', 'Machine: ' + n, 'IP: ' + String(b.machine.ip), 'Status: ' + (down ? 'Offline' : 'Back Online'), 'Detected: ' + b.detectedDate + ', ' + b.detectedTime + ' (Asia/Manila, UTC+8)', '', 'Event ID: ' + b.eventId].join('\\n'); })() }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000009",
+      "name": "Send Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        0
+      ],
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_GMAIL_CREDENTIAL_ID",
+          "name": "PisoWiFi Gmail (send only)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_deliveries"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}"
+            },
+            {
+              "keyName": "recipient_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Each Recipient').first().json.recipientId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}",
+            "recipient_id": "={{ $('Each Recipient').first().json.recipientId }}",
+            "event": "={{ $('Webhook').first().json.body.event }}",
+            "status": "sent",
+            "sent_at": "={{ $now.toUTC().toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recipient_id",
+              "displayName": "recipient_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "sent_at",
+              "displayName": "sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-00000000000a",
+      "name": "Record Sent",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1980,
+        -100
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_deliveries"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}"
+            },
+            {
+              "keyName": "recipient_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Each Recipient').first().json.recipientId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ $('Webhook').first().json.headers['x-pisowifi-event-id'] }}",
+            "recipient_id": "={{ $('Each Recipient').first().json.recipientId }}",
+            "event": "={{ $('Webhook').first().json.body.event }}",
+            "status": "failed"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recipient_id",
+              "displayName": "recipient_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-00000000000b",
+      "name": "Record Failed",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1980,
+        120
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "recipientId",
+              "type": "string",
+              "value": "={{ $('Each Recipient').first().json.recipientId }}"
+            },
+            {
+              "id": "a1",
+              "name": "outcome",
+              "type": "string",
+              "value": "sent"
+            },
+            {
+              "id": "a2",
+              "name": "recorded",
+              "type": "boolean",
+              "value": "={{ !$json.error }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-00000000000c",
+      "name": "Outcome Sent",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2200,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "recipientId",
+              "type": "string",
+              "value": "={{ $('Each Recipient').first().json.recipientId }}"
+            },
+            {
+              "id": "a1",
+              "name": "outcome",
+              "type": "string",
+              "value": "failed"
+            },
+            {
+              "id": "a2",
+              "name": "recorded",
+              "type": "boolean",
+              "value": "={{ !$json.error }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-00000000000d",
+      "name": "Outcome Failed",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2200,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0",
+              "name": "summary",
+              "type": "object",
+              "value": "={{ (() => { const o = $input.all().map(i => i.json); const p = $('Plan').first().json.plan; return { total: p.total, sent: o.filter(x => x.outcome === 'sent').length, failed: o.filter(x => x.outcome === 'failed').length, alreadySent: p.alreadySent, inFlight: p.inFlight, unrecorded: o.filter(x => x.outcome === 'sent' && !x.recorded).length }; })() }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-00000000000e",
+      "name": "Summarize",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1540,
+        300
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: $json.summary.failed + $json.summary.inFlight > 0 ? 'partial' : 'sent', sent: $json.summary.sent, failed: $json.summary.failed, alreadySent: $json.summary.alreadySent, inFlight: $json.summary.inFlight, total: $json.summary.total } }}",
+        "options": {
+          "responseCode": "={{ $json.summary.failed + $json.summary.inFlight > 0 ? 503 : 200 }}"
+        }
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-00000000000f",
+      "name": "Respond Result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: $json.plan.inFlight > 0 ? 'in_progress' : 'duplicate', sent: 0, failed: 0, alreadySent: $json.plan.alreadySent, inFlight: $json.plan.inFlight, total: $json.plan.total } }}",
+        "options": {
+          "responseCode": "={{ $json.plan.inFlight > 0 ? 503 : 200 }}"
+        }
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000010",
+      "name": "Respond Nothing To Send",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"invalid\" } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "5c1e7a20-9b3d-4e61-8f02-000000000011",
+      "name": "Respond Invalid",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        440,
+        440
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Valid Event?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid Event?": {
+      "main": [
+        [
+          {
+            "node": "Load Delivery State",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Delivery State": {
+      "main": [
+        [
+          {
+            "node": "Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan": {
+      "main": [
+        [
+          {
+            "node": "Anything To Send?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything To Send?": {
+      "main": [
+        [
+          {
+            "node": "Split Recipients",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Nothing To Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Recipients": {
+      "main": [
+        [
+          {
+            "node": "Each Recipient",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Each Recipient": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reserve",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reserve": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail": {
+      "main": [
+        [
+          {
+            "node": "Record Sent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Sent": {
+      "main": [
+        [
+          {
+            "node": "Outcome Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Failed": {
+      "main": [
+        [
+          {
+            "node": "Outcome Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outcome Sent": {
+      "main": [
+        [
+          {
+            "node": "Each Recipient",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outcome Failed": {
+      "main": [
+        [
+          {
+            "node": "Each Recipient",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Respond Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Manila",
+    "executionTimeout": 25,
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "saveExecutionProgress": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "pisowifiTemplate": "status-notifications v3 (N1-B2): per-recipient delivery state; Offline / Back Online wording"
+  },
+  "pinData": {}
+}

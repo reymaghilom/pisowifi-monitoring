@@ -1,0 +1,15 @@
+<!-- @dsCard group="Screens" height=840 width=1360 subtitle="Drawer navigation, cards instead of tables, touch targets ≥ 40px" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<div id="r" style="padding:24px;display:flex;gap:28px;justify-content:center"></div>
+<script>
+const P=PisoWiFi,i=P.icon,D=P.data;
+const mtop=(t)=>`<div class="pw-mtop"><button class="pw-icon-btn" aria-label="Menu">${i('menu')}</button><strong class="pw-grow pw-h3">${t}</strong><button class="pw-icon-btn" aria-label="Refresh">${i('refresh')}</button></div>`;
+const mc=m=>`<div class="pw-mcard"><div class="pw-row pw-between"><div><div class="pw-h3">${m.name}</div><div class="pw-small pw-muted">${m.sw} ${m.ver}</div></div>${P.badge(m.status)}</div><div class="pw-mono pw-muted">${m.ip}${m.path}</div><div class="pw-small pw-muted">Last successful check · ${m.ok}</div><div class="pw-row"><button class="pw-btn secondary sm" style="min-height:40px">Details</button><button class="pw-btn primary sm" style="min-height:40px">${i('shield',16)}Remote admin</button></div></div>`;
+document.getElementById('r').innerHTML=`
+<div class="pw-phone"><div class="pw-auth-form" style="padding:28px 20px;flex:1;align-items:flex-start;flex-direction:column;justify-content:center;gap:20px"><div class="pw-row">${P.logo()}<strong>PisoWiFi Monitoring</strong></div><div><h2 class="pw-h1">Welcome back</h2><p class="pw-muted">Sign in to continue.</p></div>${P.field('Username or email','<input class="pw-input" value="operator@example.com">')}${P.field('Password','<div class="pw-input-wrap"><input class="pw-input" type="password" value="••••••••"><button>'+i('eye')+'</button></div>')}<button class="pw-btn primary block" style="min-height:48px">Sign in</button><div class="pw-small pw-muted">Prototype · Demo data</div></div></div>
+<div class="pw-phone">${mtop('Dashboard')}<div class="pw-mbody"><div class="pw-banner info" style="padding:10px 12px">${i('info',16)}<div style="font-size:12px">Demo data</div></div>
+<div class="pw-grid pw-g2" style="gap:10px"><div class="pw-mcard"><span class="pw-label">Reachable</span><span class="pw-kpi">1</span></div><div class="pw-mcard"><span class="pw-label">Need check</span><span class="pw-kpi">1</span></div></div>${D.machines.map(mc).join('')}</div></div>
+<div class="pw-phone">${mtop('My PisoWiFi')}<div class="pw-mbody"><label class="pw-search" style="min-width:0">${i('search',18)}<input placeholder="Search"></label>${D.machines.map(mc).join('')}</div>
+<div class="pw-drawer" style="display:none"></div></div>
+<div class="pw-phone">${mtop('Dashboard')}<div class="pw-mbody"></div><div class="pw-drawer"><div class="pw-drawer-panel"><div class="pw-logo">${P.logo()}PisoWiFi Monitoring</div>${P.nav('dash')}${P.sideFoot}</div><div class="pw-drawer-scrim"></div></div></div>`;
+</script>

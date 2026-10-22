@@ -1,0 +1,25 @@
+{
+ "v": 3,
+ "layout": "files",
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-10-11T10:33:52Z"
+ },
+ "title": "PisoWiFi Monitoring",
+ "namespace": "PisoWiFi",
+ "libraries": [],
+ "sections": {},
+ "groups": [],
+ "assetGroups": {},
+ "blobs": {},
+ "docs": {
+  "readme": "project/README.md",
+  "sections": []
+ },
+ "lastChange": {
+  "by": "Claude",
+  "at": "2026-10-11T10:33:52Z",
+  "via": "Claude chat",
+  "note": "v2: Emerald Teal + Charcoal brand palette replaces blue; ZeroTier Member ID removed from Add/Edit Machine form"
+ }
+}

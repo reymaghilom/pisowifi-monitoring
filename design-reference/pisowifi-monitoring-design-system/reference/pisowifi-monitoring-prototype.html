@@ -1,0 +1,1160 @@
+<title>PisoWiFi Monitoring App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+:root{--bg:#f5f8f7;--surface:#ffffff;--surface-2:#ebf1ef;--border:#d5e0dd;--border-strong:#6b807c;--ink:#182626;--ink-muted:#4a5d5a;--brand:#0f766e;--brand-hover:#115e59;--on-brand:#ffffff;--hero:#0f766e;--hero-end:#134e4a;--on-hero:#ffffff;--brand-soft:#ddf2ee;--focus:#0d9488;--success:#2a7319;--success-soft:#e7f4df;--warning:#8f5200;--warning-soft:#fff1d6;--danger:#c01f33;--danger-soft:#fde6e9;--neutral:#576864;--neutral-soft:#e7edeb;--chart-1:#0d9488;--chart-2:#a14a00;--chart-grid:#e0e8e6;--shadow-sm:0 1px 2px rgba(18,38,38,0.06), 0 1px 1px rgba(18,38,38,0.04);--shadow-md:0 8px 24px rgba(18,38,38,0.10), 0 2px 6px rgba(18,38,38,0.06);--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-7:48px;--radius-sm:6px;--radius-md:10px;--radius-lg:14px;--radius-xl:20px;--radius-pill:999px;--font-sans:"Inter", "Inter var", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;--font-mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111c1b;--surface:#1c2b29;--surface-2:#243633;--border:#2f4542;--border-strong:#6e8a85;--ink:#e8f1ef;--ink-muted:#a6b8b4;--brand:#2dd4bf;--brand-hover:#5eead4;--on-brand:#0a1a18;--hero:#115e59;--hero-end:#0b2a27;--on-hero:#ffffff;--brand-soft:#14403b;--focus:#5eead4;--success:#8bdb6a;--success-soft:#1f3519;--warning:#f6bb48;--warning-soft:#392a0b;--danger:#ff808b;--danger-soft:#3a1720;--neutral:#9fb1ad;--neutral-soft:#263634;--chart-1:#2dd4bf;--chart-2:#ffa94d;--chart-grid:#283a37;--shadow-sm:0 1px 2px rgba(0,0,0,0.5);--shadow-md:0 10px 30px rgba(0,0,0,0.55);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111c1b;--surface:#1c2b29;--surface-2:#243633;--border:#2f4542;--border-strong:#6e8a85;--ink:#e8f1ef;--ink-muted:#a6b8b4;--brand:#2dd4bf;--brand-hover:#5eead4;--on-brand:#0a1a18;--hero:#115e59;--hero-end:#0b2a27;--on-hero:#ffffff;--brand-soft:#14403b;--focus:#5eead4;--success:#8bdb6a;--success-soft:#1f3519;--warning:#f6bb48;--warning-soft:#392a0b;--danger:#ff808b;--danger-soft:#3a1720;--neutral:#9fb1ad;--neutral-soft:#263634;--chart-1:#2dd4bf;--chart-2:#ffa94d;--chart-grid:#283a37;--shadow-sm:0 1px 2px rgba(0,0,0,0.5);--shadow-md:0 10px 30px rgba(0,0,0,0.55);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 14px/22px var(--font-sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,p{margin:0}
+a{color:var(--brand)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.pw-ic{flex:none;display:inline-block;vertical-align:middle}
+.pw-mono{font-family:var(--font-mono);font-size:13px;line-height:20px;font-weight:500}
+.pw-muted{color:var(--ink-muted)}
+.pw-small{font-size:12px;line-height:18px;font-weight:500}
+.pw-label{font-size:11px;line-height:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)}
+.pw-h1{font-size:26px;line-height:32px;font-weight:650;letter-spacing:-.015em}
+.pw-h2{font-size:18px;line-height:26px;font-weight:600;letter-spacing:-.01em}
+.pw-h3{font-size:15px;line-height:22px;font-weight:600}
+.pw-kpi{font-size:30px;line-height:36px;font-weight:700;letter-spacing:-.02em}
+.pw-row{display:flex;align-items:center;gap:var(--space-3)}
+.pw-between{justify-content:space-between}
+.pw-wrap{flex-wrap:wrap}
+.pw-stack{display:flex;flex-direction:column;gap:var(--space-4)}
+.pw-grow{flex:1;min-width:0}
+.pw-grid{display:grid;gap:var(--space-5)}
+.pw-g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pw-g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pw-g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.pw-g-main{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+
+/* shell */
+.pw-app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100%;background:var(--bg)}
+.pw-side{background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:2px}
+.pw-logo{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;font-weight:700;font-size:15px;letter-spacing:-.01em}
+.pw-logo-mark{width:32px;height:32px;border-radius:var(--radius-md);background:var(--brand);color:var(--on-brand);display:grid;place-items:center}
+.pw-nav{display:flex;flex-direction:column;gap:2px}
+.pw-nav a{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:var(--radius-md);color:var(--ink-muted);text-decoration:none;font-weight:500}
+.pw-nav a:hover{background:var(--surface-2);color:var(--ink)}
+.pw-nav a[aria-current=page]{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.pw-side-foot{margin-top:auto;padding:12px;border:1px dashed var(--border-strong);border-radius:var(--radius-lg);color:var(--ink-muted);font-size:12px;line-height:18px}
+.pw-top{display:flex;align-items:center;gap:var(--space-3);padding:14px var(--space-6);background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+.pw-search{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--surface);color:var(--ink-muted);min-width:240px}
+.pw-search input{border:0;outline:0;background:transparent;color:var(--ink);font:inherit;width:100%}
+.pw-icon-btn{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--surface);color:var(--ink);cursor:pointer}
+.pw-icon-btn:hover{background:var(--surface-2)}
+.pw-avatar{width:36px;height:36px;border-radius:var(--radius-pill);background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-weight:700;font-size:13px}
+.pw-page{padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-5);max-width:1280px}
+.pw-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap}
+
+/* cards */
+.pw-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-5)}
+.pw-card.flat{box-shadow:none}
+.pw-card-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-4)}
+.pw-stat{display:flex;flex-direction:column;gap:6px}
+.pw-stat-top{display:flex;align-items:center;justify-content:space-between;color:var(--ink-muted)}
+.pw-stat-ic{width:36px;height:36px;border-radius:var(--radius-md);display:grid;place-items:center;background:var(--brand-soft);color:var(--brand)}
+.pw-stat-ic.ok{background:var(--success-soft);color:var(--success)}
+.pw-stat-ic.bad{background:var(--danger-soft);color:var(--danger)}
+.pw-stat-ic.warn{background:var(--warning-soft);color:var(--warning)}
+.pw-stat-ic.mute{background:var(--neutral-soft);color:var(--neutral)}
+
+/* buttons */
+.pw-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:var(--radius-md);border:1px solid transparent;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+.pw-btn.primary{background:var(--brand);color:var(--on-brand)}
+.pw-btn.primary:hover{background:var(--brand-hover)}
+.pw-btn.secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong)}
+.pw-btn.secondary:hover{background:var(--surface-2)}
+.pw-btn.ghost{background:transparent;color:var(--brand)}
+.pw-btn.ghost:hover{background:var(--brand-soft)}
+.pw-btn.danger{background:var(--danger);color:var(--on-brand)}
+.pw-btn.danger-outline{background:var(--surface);color:var(--danger);border-color:var(--danger)}
+.pw-btn.sm{min-height:32px;padding:0 10px;font-size:13px}
+.pw-btn.block{width:100%}
+.pw-btn[disabled],.pw-btn.loading{opacity:.65;cursor:not-allowed}
+.pw-spin{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:pwspin .8s linear infinite}
+@keyframes pwspin{to{transform:rotate(360deg)}}
+
+/* forms */
+.pw-field{display:flex;flex-direction:column;gap:6px}
+.pw-field>label{font-weight:600;font-size:13px}
+.pw-input,.pw-select,.pw-textarea{width:100%;min-height:42px;padding:0 12px;border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--surface);color:var(--ink);font:inherit}
+.pw-textarea{padding:10px 12px;min-height:84px;resize:vertical}
+.pw-input::placeholder{color:var(--ink-muted)}
+.pw-input-wrap{position:relative}
+.pw-input-wrap .pw-input{padding-right:44px}
+.pw-input-wrap button{position:absolute;right:4px;top:3px;width:36px;height:36px;border:0;background:transparent;color:var(--ink-muted);border-radius:var(--radius-sm);cursor:pointer}
+.pw-field.err .pw-input,.pw-field.err .pw-select{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+.pw-field.ok .pw-input{border-color:var(--success);box-shadow:0 0 0 1px var(--success)}
+.pw-help{font-size:12px;line-height:18px;color:var(--ink-muted)}
+.pw-msg-err{font-size:12px;line-height:18px;color:var(--danger);display:flex;gap:6px;align-items:center;font-weight:500}
+.pw-msg-ok{font-size:12px;line-height:18px;color:var(--success);display:flex;gap:6px;align-items:center;font-weight:500}
+.pw-check{display:flex;align-items:center;gap:10px;cursor:pointer}
+.pw-box{width:20px;height:20px;border:1.5px solid var(--border-strong);border-radius:5px;display:grid;place-items:center;background:var(--surface);color:var(--on-brand)}
+.pw-box.on{background:var(--brand);border-color:var(--brand)}
+.pw-toggle{width:44px;height:26px;border-radius:var(--radius-pill);background:var(--neutral-soft);border:1.5px solid var(--border-strong);position:relative;flex:none;cursor:pointer;padding:0}
+.pw-toggle::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:var(--ink-muted);transition:transform .15s}
+.pw-toggle.on{background:var(--brand);border-color:var(--brand)}
+.pw-toggle.on::after{transform:translateX(18px);background:var(--on-brand)}
+.pw-seg{display:inline-flex;padding:3px;gap:2px;background:var(--surface-2);border-radius:var(--radius-pill);border:1px solid var(--border)}
+.pw-seg button{border:0;background:transparent;padding:6px 14px;border-radius:var(--radius-pill);font-weight:600;font-size:13px;color:var(--ink-muted);cursor:pointer}
+.pw-seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm)}
+.pw-chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--ink)}
+.pw-tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);overflow-x:auto}
+.pw-tabs button{border:0;background:transparent;padding:10px 14px;font-weight:600;color:var(--ink-muted);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.pw-tabs button[aria-selected=true]{color:var(--brand);border-bottom-color:var(--brand)}
+
+/* badges */
+.pw-badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:var(--radius-pill);font-size:12px;font-weight:600;white-space:nowrap}
+.pw-badge.ok{background:var(--success-soft);color:var(--success)}
+.pw-badge.bad{background:var(--danger-soft);color:var(--danger)}
+.pw-badge.warn{background:var(--warning-soft);color:var(--warning)}
+.pw-badge.info{background:var(--brand-soft);color:var(--brand)}
+.pw-badge.mute{background:var(--neutral-soft);color:var(--neutral)}
+.pw-badge.tag{border-radius:var(--radius-sm);border:1px dashed currentColor;background:transparent}
+
+/* banners / toasts */
+.pw-banner{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius-lg);border:1px solid var(--border);font-size:13px;line-height:20px}
+.pw-banner.info{background:var(--brand-soft);color:var(--ink);border-color:transparent}
+.pw-banner.info>.pw-ic{color:var(--brand)}
+.pw-banner.warn{background:var(--warning-soft);color:var(--ink);border-color:transparent}
+.pw-banner.warn>.pw-ic{color:var(--warning)}
+.pw-banner.bad{background:var(--danger-soft);color:var(--ink);border-color:transparent}
+.pw-banner.bad>.pw-ic{color:var(--danger)}
+.pw-banner.ok{background:var(--success-soft);color:var(--ink);border-color:transparent}
+.pw-banner.ok>.pw-ic{color:var(--success)}
+.pw-toast{display:flex;gap:12px;align-items:center;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);max-width:380px}
+
+/* table */
+.pw-tablewrap{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);overflow:hidden;box-shadow:var(--shadow-sm)}
+.pw-table{width:100%;border-collapse:collapse}
+.pw-table th{text-align:left;padding:12px 16px;background:var(--surface-2);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted);white-space:nowrap}
+.pw-table td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle}
+.pw-table tbody tr:hover{background:var(--surface-2)}
+.pw-actions{display:flex;gap:4px;justify-content:flex-end}
+.pw-act{width:34px;height:34px;display:grid;place-items:center;border:0;background:transparent;border-radius:var(--radius-sm);color:var(--ink-muted);cursor:pointer}
+.pw-act:hover{background:var(--surface-2);color:var(--ink)}
+.pw-act.d:hover{background:var(--danger-soft);color:var(--danger)}
+
+/* kv list */
+.pw-kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px 16px}
+.pw-kv dt{color:var(--ink-muted);font-size:13px}
+.pw-kv dd{margin:0;font-weight:500;min-width:0;overflow-wrap:anywhere}
+
+/* events / timeline */
+.pw-events{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.pw-events li{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--border)}
+.pw-events li:first-child{border-top:0;padding-top:0}
+.pw-ev-ic{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;flex:none}
+.pw-ev-ic.ok{background:var(--success-soft);color:var(--success)}
+.pw-ev-ic.bad{background:var(--danger-soft);color:var(--danger)}
+.pw-ev-ic.warn{background:var(--warning-soft);color:var(--warning)}
+.pw-ev-ic.mute{background:var(--neutral-soft);color:var(--neutral)}
+.pw-ev-ic.info{background:var(--brand-soft);color:var(--brand)}
+
+/* skeleton / empty / modal */
+.pw-skel{background:linear-gradient(90deg,var(--surface-2) 0%,var(--border) 50%,var(--surface-2) 100%);background-size:200% 100%;animation:pwsh 1.4s linear infinite;border-radius:var(--radius-sm);height:14px}
+@keyframes pwsh{to{background-position:-200% 0}}
+.pw-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:var(--space-7) var(--space-5);border:1px dashed var(--border-strong);border-radius:var(--radius-lg);background:var(--surface)}
+.pw-empty-ic{width:56px;height:56px;border-radius:var(--radius-xl);background:var(--brand-soft);color:var(--brand);display:grid;place-items:center}
+.pw-empty-ic.bad{background:var(--danger-soft);color:var(--danger)}
+.pw-empty-ic.warn{background:var(--warning-soft);color:var(--warning)}
+.pw-empty-ic.mute{background:var(--neutral-soft);color:var(--neutral)}
+.pw-empty-ic.ok{background:var(--success-soft);color:var(--success)}
+.pw-scrim{background:rgba(8,20,19,.55);display:grid;place-items:center;padding:24px;border-radius:var(--radius-lg)}
+.pw-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);padding:24px;width:100%;max-width:440px;display:flex;flex-direction:column;gap:16px}
+
+/* charts */
+.pw-chart{width:100%;height:auto;display:block}
+.pw-chart text{font:500 11px var(--font-sans);fill:var(--ink-muted)}
+.pw-chart .grid{stroke:var(--chart-grid);stroke-width:1}
+.pw-chart .l1{fill:none;stroke:var(--chart-1);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.pw-chart .l2{fill:none;stroke:var(--chart-2);stroke-width:2.5;stroke-dasharray:6 4;stroke-linejoin:round;stroke-linecap:round}
+.pw-chart .a1{fill:var(--chart-1);opacity:.12}
+.pw-chart .b1{fill:var(--chart-1)}
+.pw-chart .b2{fill:var(--chart-2)}
+.pw-chart .s-ok{fill:var(--success)}
+.pw-chart .s-bad{fill:var(--danger)}
+.pw-chart .s-warn{fill:var(--warning)}
+.pw-chart .s-mute{fill:var(--border-strong)}
+.pw-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;font-weight:500;color:var(--ink-muted)}
+.pw-legend i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle;background:var(--chart-1)}
+.pw-legend i.d2{background:repeating-linear-gradient(90deg,var(--chart-2) 0 6px,transparent 6px 9px)}
+.pw-legend i.sq{height:10px;width:10px;border-radius:3px}
+
+/* auth */
+.pw-auth{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);min-height:640px;background:var(--bg)}
+.pw-auth-hero{background:linear-gradient(155deg,var(--hero) 0%,var(--hero-end) 100%);color:var(--on-hero);padding:48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.pw-auth-hero .rings{position:absolute;right:-120px;bottom:-120px;opacity:.18}
+.pw-auth-form{display:flex;align-items:center;justify-content:center;padding:48px}
+.pw-auth-card{width:100%;max-width:400px;display:flex;flex-direction:column;gap:20px}
+.pw-otp{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.pw-otp div{height:52px;border:1px solid var(--border-strong);border-radius:var(--radius-md);display:grid;place-items:center;font:600 20px var(--font-mono);background:var(--surface)}
+
+/* remote admin placeholder */
+.pw-browser{border:1px solid var(--border-strong);border-radius:var(--radius-lg);overflow:hidden;background:var(--surface)}
+.pw-browser-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+.pw-browser-url{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:30px;padding:0 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-pill);color:var(--ink-muted)}
+.pw-stepper{display:flex;flex-direction:column;gap:0}
+.pw-step{display:flex;gap:12px;padding-bottom:16px;position:relative}
+.pw-step:not(:last-child)::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:var(--border)}
+.pw-step-dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--neutral-soft);color:var(--neutral);font-size:12px;font-weight:700}
+.pw-step-dot.ok{background:var(--success-soft);color:var(--success)}
+.pw-step-dot.now{background:var(--brand-soft);color:var(--brand)}
+.pw-step-dot.bad{background:var(--danger-soft);color:var(--danger)}
+
+/* phone frames */
+.pw-phone{width:390px;border:8px solid var(--ink);border-radius:36px;overflow:hidden;background:var(--bg);position:relative;height:760px;display:flex;flex-direction:column}
+.pw-mtop{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+.pw-mbody{padding:16px;display:flex;flex-direction:column;gap:12px;overflow:hidden;flex:1}
+.pw-drawer{position:absolute;inset:0;display:flex}
+.pw-drawer-panel{width:280px;background:var(--surface);padding:16px 12px;box-shadow:var(--shadow-md);display:flex;flex-direction:column;gap:2px}
+.pw-drawer-scrim{flex:1;background:rgba(8,20,19,.55)}
+.pw-mcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow-sm)}
+.pw-ghost-cs{opacity:.85}
+/* ===== app layer: responsive shell, overlays, interactions ===== */
+:root{--pad:32px}
+html{scroll-behavior:auto}
+body{min-height:100vh;overflow-x:hidden}
+#app{min-height:100vh}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:8px;top:-48px;background:var(--brand);color:var(--on-brand);padding:10px 14px;border-radius:var(--radius-md);z-index:100;font-weight:600;text-decoration:none}
+.skip:focus{top:8px}
+button{cursor:pointer}
+button[disabled],.pw-btn[disabled],.pw-toggle[disabled]{cursor:not-allowed}
+.pw-app{grid-template-columns:var(--sw,248px) minmax(0,1fr);transition:grid-template-columns .18s ease}
+.pw-app.collapsed{--sw:72px}
+.pw-side{position:sticky;top:0;height:100vh;overflow:hidden auto}
+.pw-main-col{min-width:0;display:flex;flex-direction:column}
+.pw-logo{white-space:nowrap}
+.collapsed .nl,.collapsed .pw-logo-t,.collapsed .pw-side-foot{display:none}
+.collapsed .pw-nav a{justify-content:center;padding:0}
+.collapsed .pw-logo{justify-content:center;padding-inline:0}
+.collapse-btn{margin-top:auto;display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border:0;background:transparent;color:var(--ink-muted);border-radius:var(--radius-md);font-weight:500;width:100%}
+.collapse-btn:hover{background:var(--surface-2);color:var(--ink)}
+.collapsed .collapse-btn{justify-content:center;padding:0}
+.collapse-btn .pw-ic{transition:transform .18s}
+.collapsed .collapse-btn .pw-ic{transform:rotate(180deg)}
+.collapse-btn .pw-ic.fl{transform:rotate(180deg)}
+.collapsed .collapse-btn .pw-ic.fl{transform:none}
+.pw-side-foot{margin-top:8px}
+.pw-nav a{position:relative}
+.pw-top{flex-wrap:wrap;padding:12px var(--pad)}
+.pw-top .pw-grow{min-width:0;flex:1 1 180px}
+.pw-top h1{overflow-wrap:anywhere}
+.pw-search{flex:0 1 280px;min-width:0}
+.pw-page{padding:var(--pad);width:100%;max-width:1320px;margin-inline:auto}
+.burger{display:none}
+.menu-wrap{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 8px);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:6px;min-width:220px;z-index:20}
+.menu button,.menu .mi{display:flex;align-items:center;gap:10px;width:100%;min-height:40px;padding:0 10px;border:0;background:transparent;border-radius:var(--radius-md);color:var(--ink);font-weight:500;text-align:left}
+.menu button:hover{background:var(--surface-2)}
+.menu hr{border:0;border-top:1px solid var(--border);margin:6px 0}
+.who{display:flex;align-items:center;gap:8px;border:0;background:transparent;border-radius:var(--radius-md);padding:2px 6px 2px 2px;color:var(--ink);min-height:40px}
+.who:hover{background:var(--surface-2)}
+.pw-grid.g-auto{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.pw-card{min-width:0}
+.pw-kpi{overflow-wrap:anywhere}
+.pw-kv{grid-template-columns:minmax(110px,150px) minmax(0,1fr)}
+.pw-kv.kv2{grid-template-columns:minmax(110px,150px) minmax(0,1fr) minmax(110px,150px) minmax(0,1fr);gap:12px 16px;margin:20px 0 0}
+select.pw-select{appearance:auto}
+.pw-field>label,.pw-field>.lbl{font-weight:600;font-size:13px}
+.pw-btn[aria-pressed=true]{background:var(--brand-soft);color:var(--brand)}
+.pw-card.sel{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.rowlink{background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--ink);text-align:left;text-decoration:none}
+.rowlink:hover{color:var(--brand);text-decoration:underline}
+.t-lg,.t-md{display:block}.cardlist.c-lg,.cardlist.c-md{display:none}
+.pw-tablewrap{overflow-x:auto}
+.pw-table td,.pw-table th{overflow-wrap:anywhere}
+.pw-table th.nw,.pw-table td.nw{white-space:nowrap;overflow-wrap:normal}
+.th-btn{border:0;background:none;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;display:inline-flex;gap:4px;align-items:center;padding:0}
+.th-btn:hover{color:var(--ink)}
+.cardlist{display:flex;flex-direction:column;gap:12px}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0 0}
+.cw{position:relative;min-height:200px}
+.cw svg{display:block}
+.cw .cur{stroke:var(--ink-muted);stroke-width:1;stroke-dasharray:4 3;opacity:0}
+.cw rect[data-tip]{cursor:default}
+.cw rect[data-tip]:hover{opacity:.8}
+.pw-legend button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius-pill);padding:4px 10px;font-weight:600;font-size:12px;color:var(--ink)}
+.pw-legend button i{margin:0}
+.pw-legend button[aria-pressed=false]{color:var(--ink-muted);text-decoration:line-through}
+.pw-legend button[aria-pressed=false] i{opacity:.35}
+#tip{position:fixed;z-index:80;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 10px;border-radius:8px;font:600 12px/17px var(--font-sans);max-width:240px;box-shadow:var(--shadow-md)}
+#toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:90;width:calc(100% - 32px);max-width:400px;pointer-events:none;align-items:stretch}
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(8,20,19,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+.dialog{background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);width:100%;max-width:640px;max-height:calc(100vh - 32px);display:flex;flex-direction:column}
+.dialog.sm{max-width:440px}
+.dialog-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 24px 12px}
+.dialog-b{padding:4px 24px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.dialog-f{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px 20px;flex-wrap:wrap}
+.drawer-wrap{position:fixed;inset:0;z-index:60;display:flex}
+.drawer-wrap .pw-drawer-panel{width:min(300px,86vw);height:100%;overflow-y:auto;position:relative}
+.drawer-wrap .pw-drawer-scrim{flex:1;background:rgba(8,20,19,.6);border:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:42px;padding:6px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-md);align-items:center;background:var(--surface)}
+.chips input{border:0;outline:0;background:transparent;color:var(--ink);font:inherit;flex:1;min-width:90px}
+.chips button{border:0;background:none;color:inherit;display:grid;padding:0}
+.arch{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:stretch}
+.node{border:1px solid var(--border-strong);border-radius:var(--radius-lg);padding:12px;background:var(--surface);display:flex;flex-direction:column;gap:6px;position:relative;min-width:0}
+.node .pw-small{overflow-wrap:anywhere}
+.node.future{border-style:dashed}
+.node.act{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft),0 0 0 3px var(--brand)}
+.node.done{border-color:var(--success)}
+.node.fail{border-color:var(--danger);box-shadow:0 0 0 2px var(--danger-soft)}
+.node-ic{width:34px;height:34px;border-radius:var(--radius-md);background:var(--surface-2);display:grid;place-items:center;color:var(--ink)}
+.node.act .node-ic{background:var(--brand-soft);color:var(--brand)}
+.node.done .node-ic{background:var(--success-soft);color:var(--success)}
+.node.fail .node-ic{background:var(--danger-soft);color:var(--danger)}
+.pw-otp-in{width:100%;height:56px;text-align:center;font:600 24px var(--font-mono);letter-spacing:.5em;padding-left:.5em;border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--surface);color:var(--ink)}
+.pw-field.err .pw-otp-in{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+.meter{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:3px}
+.set-nav{display:flex;flex-direction:column;gap:2px}
+.set-nav button{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 12px;border:0;background:transparent;border-radius:var(--radius-md);color:var(--ink-muted);font-weight:500;text-align:left}
+.set-nav button:hover{background:var(--surface-2);color:var(--ink)}
+.set-nav button[aria-current=true]{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.set-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;align-items:start}
+.tg{background:var(--surface-2);border-radius:var(--radius-lg);padding:14px;max-width:420px;border:1px dashed var(--border-strong)}
+.tg-b{background:var(--surface);border:1px solid var(--border);border-radius:14px 14px 14px 4px;padding:10px 12px;font-size:13px;line-height:20px;white-space:pre-line}
+.qr{width:132px;height:132px;border-radius:var(--radius-md);background:repeating-conic-gradient(var(--ink) 0 25%,var(--surface) 0 50%) 0 0/22px 22px;border:6px solid var(--surface);outline:1px solid var(--border-strong)}
+.seg-wrap{overflow-x:auto;max-width:100%}
+.statebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.statebar select{min-height:36px;width:auto;padding:0 10px}
+.pw-card-head{flex-wrap:wrap}
+.pw-card-head>*{min-width:0}
+.pw-events li .pw-grow{min-width:0;overflow-wrap:anywhere}
+.pw-actions{flex-wrap:wrap}
+.rule{display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--border)}
+.rule:first-of-type{border-top:0}
+.pw-toggle:focus-visible,.pw-box:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.hide-sm{display:inline-flex}
+.login-m{display:none}
+.pw-auth{min-height:100vh}
+.pw-auth-hero h2{overflow-wrap:anywhere}
+
+@media(max-width:1100px){
+ :root{--pad:24px}
+ .pw-g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pw-g-main{grid-template-columns:minmax(0,1fr)}
+ .t-lg{display:none}.cardlist.c-lg{display:flex}
+ .pw-kv.kv2{grid-template-columns:minmax(110px,150px) minmax(0,1fr)}
+}
+@media(max-width:899px){
+ .pw-app{grid-template-columns:minmax(0,1fr)}
+ .pw-side{display:none}
+ .burger{display:grid}
+ .pw-g3{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .t-md{display:none}.cardlist.c-md{display:flex}
+ .set-layout{grid-template-columns:minmax(0,1fr)}
+ .set-nav{flex-direction:row;overflow-x:auto;padding-bottom:4px}
+ .set-nav button{white-space:nowrap;flex:none}
+ .pw-auth{grid-template-columns:minmax(0,1fr)}
+ .pw-auth-hero{display:none}
+ .pw-auth-form{padding:32px 16px;align-items:flex-start}
+ .login-m{display:flex}
+}
+@media(max-width:700px){
+ :root{--pad:16px}
+ .pw-search{flex:1 1 100%;order:9}
+ .who .wt{display:none}
+ .hide-sm{display:none}
+ .pw-h1{font-size:22px;line-height:28px}
+ .pw-top{gap:8px}
+ .arch{grid-template-columns:minmax(0,1fr)}
+ .pw-g2,.pw-g3{grid-template-columns:minmax(0,1fr)}
+ .pw-card{padding:16px}
+ .pw-kpi{font-size:26px;line-height:32px}
+ .pw-kv,.pw-kv.kv2{grid-template-columns:minmax(0,1fr);gap:2px}
+ .pw-kv dd{margin-bottom:10px}
+ .overlay{align-items:flex-end;padding:0}
+ .dialog{max-width:none;border-radius:var(--radius-xl) var(--radius-xl) 0 0;max-height:92vh}
+ .dialog.sm{max-width:none}
+ .dialog-h,.dialog-b,.dialog-f{padding-inline:16px}
+ .dialog-f .pw-btn{flex:1}
+ .pw-page-head .pw-btn{flex:1 1 auto}
+ .pager{justify-content:center}
+}
+@media(max-width:420px){
+ .pw-g4{gap:12px}
+ .pw-stat-top .pw-label{font-size:10px;letter-spacing:.04em}
+ .pw-stat-ic{width:30px;height:30px}
+ .pw-btn{padding:0 12px}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
+.pw-badge{max-width:100%;white-space:normal;height:auto;min-height:26px;padding-block:3px;line-height:16px}
+.pw-badge .pw-ic{align-self:flex-start;margin-top:1px}
+@media(max-width:700px){
+ .pw-top{flex-wrap:wrap;align-items:center}
+ .pw-top .pw-grow{flex:1 1 0;min-width:0}
+ .pw-top .pw-grow .pw-small{display:none}
+ .who>.pw-ic{display:none}
+ .who{padding:0;min-height:40px}
+ .pw-top .pw-icon-btn{flex:none}
+}
+
+@media(max-width:1000px){.hide-sm{display:none}.who .wt,.who>.pw-ic{display:none}.who{padding:0}.pw-search{flex:1 1 140px}}
+
+/* ---- polish pass ---- */
+.pw-btn,.pw-card,.pw-nav a,.pw-icon-btn,.pw-act,.pw-seg button,.pw-tabs button,.menu button,.pw-legend button{transition:background-color .15s ease,border-color .15s ease,box-shadow .15s ease,color .15s ease}
+.pw-btn:active{transform:translateY(1px)}
+button.pw-card:hover{border-color:var(--brand)}
+.pw-toggle{position:relative}
+.pw-toggle::before{content:"";position:absolute;inset:-9px -3px}
+.pw-check{min-height:40px}
+.route-in{animation:routein .22s ease-out}
+@keyframes routein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.zt-line{display:block;font-size:12px;line-height:18px;color:var(--ink-muted);font-weight:500}
+.pw-search:focus-within{outline:2px solid var(--focus);outline-offset:2px}
+.pw-search input:focus-visible{outline:none}
+.pw-tabs button:focus-visible{outline-offset:-2px}
+@media(max-width:1100px){.pw-act{width:40px;height:40px}}
+@media(max-width:899px){
+ .pw-btn.sm{min-height:40px}
+ .pw-seg button{min-height:40px;padding-inline:14px}
+ .rowlink{padding-block:9px}
+ .th-btn{min-height:40px}
+ .pw-legend button{min-height:40px;padding-inline:12px}
+ .pw-icon-btn{width:44px;height:44px}
+ .pw-tabs button{min-height:44px}
+}
+@media(max-width:700px){.pw-search{flex:1 1 100%}}
+
+@media(max-width:899px){.pw-select,.pw-input{min-height:40px}}
+@media(max-width:899px){.statebar select{min-height:40px}}
+/* final polish: no focus frame on programmatic main focus; titles never break mid-word */
+#main:focus,#main:focus-visible,main[tabindex="-1"]:focus{outline:none}
+.pw-top h1{overflow-wrap:normal;word-break:normal;hyphens:manual}
+@media(max-width:480px){
+ .pw-top .pw-grow{order:5;flex:1 1 100%}
+ .pw-top .burger{margin-right:auto}
+ .pw-top .pw-h1{font-size:20px;line-height:26px}
+}
+.pw-table td:first-child,.pw-table th{white-space:nowrap}
+@media(max-width:420px){.pw-g4{grid-template-columns:1fr}}
+.span-all{grid-column:1/-1;min-width:0}
+
+</style>
+<div id="app"></div>
+<script>
+/* @ds-bundle: {"format":4,"namespace":"PisoWiFi","components":[{"name":"StatusBadge"},{"name":"AppShell"},{"name":"LineChart"}]} */
+(function () {
+  var P = {};
+  var ICONS = {
+    dashboard: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+    wifi: '<path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><path d="M2 9a14 14 0 0 1 20 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/>',
+    server: '<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/>',
+    pulse: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+    shield: '<path d="M12 3l8 3v6c0 4.5-3.3 8-8 9-4.7-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+    history: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    chart: '<path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>',
+    zap: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+    settings: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+    refresh: '<path d="M20 11a8 8 0 0 0-14.5-4M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6L19 19M5 19l1.4-1.4M17.6 6.4L19 5"/>',
+    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
+    bell: '<path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+    menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+    trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+    eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    eyeoff: '<path d="M3 3l18 18"/><path d="M10.6 6.1A9.8 9.8 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.3 7.6A16 16 0 0 0 2 12s4 7 10 7c1.6 0 3-.4 4.2-1"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
+    alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+    external: '<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+    lock: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+    chevron: '<path d="M9 6l6 6-6 6"/>',
+    filter: '<path d="M3 5h18l-7 8v6l-4-2v-4z"/>',
+    download: '<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',
+    cpu: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+    coins: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6v1.5M12 16.5V18"/>',
+    thermo: '<path d="M14 14.5V5a2 2 0 0 0-4 0v9.5a4 4 0 1 0 4 0z"/>',
+    ram: '<rect x="3" y="7" width="18" height="10" rx="1.5"/><path d="M7 11v2M11 11v2M15 11v2M7 17v3M12 17v3M17 17v3"/>',
+    disk: '<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+    users: '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c.8-3.5 3.5-5 7-5s6.2 1.5 7 5M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2 .6 3.5 2 4 5"/>',
+    send: '<path d="M21 3L3 10.5l7 3 3 7z"/><path d="M10 13.5L21 3"/>',
+    play: '<path d="M7 4l13 8-13 8z"/>',
+    pause: '<path d="M8 5v14M16 5v14"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+    key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>',
+    logout: '<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/>',
+    phone: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+    network: '<circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4M12 11.5l-6 5M12 11.5l6 5"/>',
+    inbox: '<path d="M3 13l3-8h12l3 8v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 13h5l1 3h6l1-3h5"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+  };
+  P.icon = function (n, s) {
+    s = s || 18;
+    return '<svg class="pw-ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n] || '') + '</svg>';
+  };
+
+  /* status vocabulary: always a word + an icon, never colour alone */
+  var STATUS = {
+    reachable: ['ok', 'check', 'Reachable'],
+    unreachable: ['bad', 'x', 'Unreachable'],
+    recent: ['info', 'clock', 'Recently Seen'],
+    stale: ['warn', 'alert', 'Stale'],
+    unknown: ['mute', 'info', 'Unknown'],
+    error: ['bad', 'alert', 'Monitoring Error'],
+    inet: ['warn', 'globe', 'Internet Not Yet Verified'],
+    soon: ['mute', 'clock', 'Coming Soon'],
+    notconn: ['mute', 'link', 'Not Connected Yet'],
+    demo: ['info', 'info', 'Demo data'],
+    sample: ['info', 'info', 'Sample data'],
+    proto: ['warn', 'info', 'Prototype only'],
+    enabled: ['ok', 'check', 'Enabled'],
+    paused: ['mute', 'pause', 'Paused'],
+    failed: ['bad', 'x', 'Failed'],
+    nodata: ['mute', 'info', 'Not enough checks']
+  };
+  ICONS.link = '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>';
+  P.StatusBadge = P.badge = function (key, label) {
+    var s = STATUS[key] || STATUS.unknown;
+    return '<span class="pw-badge ' + s[0] + '">' + P.icon(s[1], 14) + (label || s[2]) + '</span>';
+  };
+
+  P.logo = function (size) {
+    return '<span class="pw-logo-mark" style="' + (size ? 'width:' + size + 'px;height:' + size + 'px' : '') + '">' + P.icon('wifi', size ? size * 0.6 : 19) + '</span>';
+  };
+
+  var NAV = [
+    ['dash', 'dashboard', 'Dashboard'],
+    ['machines', 'server', 'My PisoWiFi'],
+    ['detail', 'pulse', 'Machine Details'],
+    ['remote', 'shield', 'Remote Administration'],
+    ['history', 'history', 'Monitoring History'],
+    ['reports', 'chart', 'Reports & Analytics'],
+    ['auto', 'zap', 'Automations / Integrations'],
+    ['settings', 'settings', 'Settings']
+  ];
+  P.nav = function (active) {
+    return '<nav class="pw-nav" aria-label="Main">' + NAV.map(function (n) {
+      return '<a href="#" ' + (n[0] === active ? 'aria-current="page"' : '') + '>' + P.icon(n[1], 19) + n[2] + '</a>';
+    }).join('') + '</nav>';
+  };
+  P.sideFoot = '<div class="pw-side-foot"><strong style="color:var(--ink)">Prototype · Demo data</strong><br>No live connection to ZeroTier, WiFi5Soft or n8n.</div>';
+
+  /* AppShell(active, title, subtitle, contentHTML, headActionsHTML) → HTML string */
+  P.AppShell = P.shell = function (active, title, sub, content, actions) {
+    return '<div class="pw-app"><aside class="pw-side"><div class="pw-logo">' + P.logo() + 'PisoWiFi Monitoring</div>' + P.nav(active) + P.sideFoot + '</aside>' +
+      '<div style="min-width:0"><header class="pw-top"><div class="pw-grow"><h1 class="pw-h1">' + title + '</h1>' + (sub ? '<div class="pw-small pw-muted">' + sub + '</div>' : '') + '</div>' +
+      '<label class="pw-search">' + P.icon('search', 18) + '<input placeholder="Search machines, events…" aria-label="Search"></label>' +
+      '<button class="pw-icon-btn" aria-label="Refresh">' + P.icon('refresh') + '</button>' +
+      '<button class="pw-icon-btn" data-pw-theme aria-label="Toggle light or dark theme">' + P.icon('moon') + '</button>' +
+      '<div class="pw-row" style="gap:8px"><span class="pw-avatar">OP</span><div style="line-height:16px"><div class="pw-small" style="color:var(--ink)">Operator</div><div class="pw-small pw-muted">Owner</div></div>' + P.icon('chevron', 16) + '</div>' +
+      '</header><main class="pw-page">' + (actions ? '<div class="pw-row pw-wrap" style="justify-content:flex-end">' + actions + '</div>' : '') + content + '</main></div></div>';
+  };
+
+  P.kpi = function (icon, tone, label, value, sub, badge) {
+    return '<div class="pw-card pw-stat"><div class="pw-stat-top"><span class="pw-label">' + label + '</span><span class="pw-stat-ic ' + tone + '">' + P.icon(icon, 19) + '</span></div><div class="pw-kpi">' + value + '</div><div class="pw-small pw-muted">' + (sub || '') + '</div></div>';
+  };
+
+  /* sample data: every number here is invented for the prototype */
+  P.data = {
+    machines: [
+      { id: 'm1', name: 'PisoWiFi 01', loc: 'Location not set (demo)', sw: 'WiFi5Soft', ver: 'v3.5.84', ip: '192.168.194.82', path: '/admin', status: 'reachable', seen: '1 min ago', ok: '1 min ago', tags: ['demo', 'primary'] },
+      { id: 'm2', name: 'PisoWiFi 02', loc: 'Location not set (demo)', sw: 'WiFi5Soft', ver: 'Version unknown', ip: '192.168.194.127', path: '/admin', status: 'stale', seen: '14 min ago', ok: '3 h ago', tags: ['demo'] }
+    ],
+    days: ['Sep 28', 'Sep 29', 'Sep 30', 'Oct 1', 'Oct 2', 'Oct 3', 'Oct 4', 'Oct 5', 'Oct 6', 'Oct 7', 'Oct 8', 'Oct 9', 'Oct 10', 'Oct 11'],
+    up1: [100, 100, 99.8, 100, 98.9, 100, 100, 99.7, 100, 100, 97.2, 100, 100, 99.9],
+    up2: [99.1, 98.7, 100, 96.4, 99.5, 98.2, 99.9, 97.8, 99.2, 94.6, 99.0, 98.4, 96.9, 97.5],
+    rt1: [42, 44, 41, 47, 52, 43, 41, 45, 44, 42, 61, 43, 41, 44],
+    rt2: [88, 92, 85, 120, 96, 101, 90, 134, 97, 148, 93, 99, 118, 105]
+  };
+
+  /* LineChart({w,h,labels,series:[{v,cls}],min,max,ticks,unit,area}) → svg string */
+  P.LineChart = P.line = function (o) {
+    var w = o.w || 640, h = o.h || 240, L = 50, R = 14, T = 12, B = 26;
+    var min = o.min, max = o.max, n = o.labels.length, ticks = o.ticks || 4;
+    var iw = w - L - R, ih = h - T - B;
+    var X = function (i) { return L + (n === 1 ? iw / 2 : i * iw / (n - 1)); };
+    var Y = function (v) { return T + ih - (v - min) / (max - min) * ih; };
+    var s = '<svg class="pw-chart" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + (o.alt || 'Sample chart') + '">';
+    for (var t = 0; t <= ticks; t++) {
+      var v = min + (max - min) * t / ticks, y = Y(v);
+      s += '<line class="grid" x1="' + L + '" x2="' + (w - R) + '" y1="' + y + '" y2="' + y + '"/><text x="' + (L - 8) + '" y="' + (y + 4) + '" text-anchor="end">' + Math.round(v * 10) / 10 + (o.unit || '') + '</text>';
+    }
+    var step = Math.ceil(n / (w < 420 ? 4 : 7));
+    o.labels.forEach(function (lb, i) { if (i % step === 0) s += '<text x="' + X(i) + '" y="' + (h - 6) + '" text-anchor="middle">' + lb + '</text>'; });
+    o.series.forEach(function (se) {
+      var d = se.v.map(function (v, i) { return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(Math.max(min, Math.min(max, v))).toFixed(1); }).join(' ');
+      if (se.area) s += '<path class="a1" d="' + d + ' L' + X(n - 1) + ' ' + (T + ih) + ' L' + X(0) + ' ' + (T + ih) + ' Z"/>';
+      s += '<path class="' + se.cls + '" d="' + d + '"/>';
+    });
+    return s + '</svg>';
+  };
+
+  /* status strip: array of 'ok'|'bad'|'warn'|'mute' → one segmented bar */
+  P.strip = function (arr, h) {
+    h = h || 28; var w = 600, g = 2, cw = (w - g * (arr.length - 1)) / arr.length;
+    return '<svg class="pw-chart" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Sample status timeline">' + arr.map(function (k, i) {
+      return '<rect class="s-' + k + '" x="' + (i * (cw + g)).toFixed(1) + '" y="0" width="' + cw.toFixed(1) + '" height="' + h + '" rx="3"/>';
+    }).join('') + '</svg>';
+  };
+
+  /* grouped bars: groups [{label, a, b}] */
+  P.bars = function (o) {
+    var w = o.w || 520, h = o.h || 220, L = 34, B = 26, T = 10, ih = h - T - B, n = o.groups.length, gw = (w - L - 8) / n, bw = Math.min(22, gw / 3), max = o.max;
+    var s = '<svg class="pw-chart" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + (o.alt || 'Sample bar chart') + '">';
+    for (var t = 0; t <= 4; t++) { var y = T + ih - ih * t / 4; s += '<line class="grid" x1="' + L + '" x2="' + (w - 8) + '" y1="' + y + '" y2="' + y + '"/><text x="' + (L - 6) + '" y="' + (y + 4) + '" text-anchor="end">' + Math.round(max * t / 4) + '</text>'; }
+    o.groups.forEach(function (g, i) {
+      var cx = L + gw * i + gw / 2, ha = g.a / max * ih, hb = g.b / max * ih;
+      s += '<rect class="b1" x="' + (cx - bw - 1) + '" y="' + (T + ih - ha) + '" width="' + bw + '" height="' + ha + '" rx="4"/><rect class="b2" x="' + (cx + 1) + '" y="' + (T + ih - hb) + '" width="' + bw + '" height="' + hb + '" rx="4"/><text x="' + cx + '" y="' + (h - 6) + '" text-anchor="middle">' + g.label + '</text>';
+    });
+    return s + '</svg>';
+  };
+
+  P.events = [
+    ['warn', 'alert', 'PisoWiFi 02', 'Stale — no successful HTTP check for 15 min', '12 min ago'],
+    ['ok', 'check', 'PisoWiFi 01', 'Recovered — admin interface reachable again', '2 h ago'],
+    ['bad', 'x', 'PisoWiFi 01', 'Unreachable — HTTP check timed out after 5 s', '2 h 9 min ago'],
+    ['mute', 'info', 'PisoWiFi 02', 'Internet not yet verified — check not configured', 'Yesterday'],
+    ['info', 'settings', 'System', 'Monitoring interval changed to 60 s (demo)', 'Yesterday']
+  ];
+  P.eventList = function (n) {
+    return '<ul class="pw-events">' + P.events.slice(0, n || 5).map(function (e) {
+      return '<li><span class="pw-ev-ic ' + e[0] + '">' + P.icon(e[1], 16) + '</span><div class="pw-grow"><div style="font-weight:600">' + e[2] + '</div><div class="pw-muted" style="font-size:13px">' + e[3] + '</div></div><span class="pw-small pw-muted" style="white-space:nowrap">' + e[4] + '</span></li>';
+    }).join('') + '</ul>';
+  };
+
+  P.field = function (label, input, help, state, msg) {
+    return '<div class="pw-field ' + (state || '') + '"><label>' + label + '</label>' + input + (msg ? '<div class="pw-msg-' + (state === 'ok' ? 'ok' : 'err') + '">' + P.icon(state === 'ok' ? 'check' : 'alert', 14) + msg + '</div>' : (help ? '<div class="pw-help">' + help + '</div>' : '')) + '</div>';
+  };
+
+  window.PisoWiFi = P;
+  })();
+
+</script>
+<script>
+(function(){
+'use strict';
+var P=PisoWiFi,I=P.icon,B=P.badge;
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var MIN=60000,HR=3600000,DAY=86400000;
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function pad(n){return (n<10?'0':'')+n}
+function dShort(t){var d=new Date(t);return MON[d.getMonth()]+' '+d.getDate()}
+function dTime(t){var d=new Date(t);return MON[d.getMonth()]+' '+d.getDate()+', '+pad(d.getHours())+':'+pad(d.getMinutes())}
+function iso(t){var d=new Date(t);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function ago(t){if(!t)return 'Never';var d=Math.max(0,Date.now()-t);if(d<60000)return 'just now';if(d<HR)return Math.round(d/MIN)+' min ago';if(d<DAY){var h=Math.floor(d/HR),m=Math.round((d-h*HR)/MIN);return h+' h'+(m?' '+m+' min':'')+' ago'}var n=Math.round(d/DAY);return n+' day'+(n>1?'s':'')+' ago'}
+function dur(min){min=Math.round(min);if(min<60)return min+' min';var h=Math.floor(min/60),m=min%60;return h+' h'+(m?' '+m+' min':'')}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function startDay(t){var d=new Date(t);d.setHours(0,0,0,0);return d.getTime()}
+
+/* ---------- sample history (every number is invented) ---------- */
+var HIST={};
+function genHist(id,q,base,seed,dmax){
+  var r=rng(seed),today=startDay(Date.now()),outs=[],ev=[];
+  for(var i=29;i>=0;i--){
+    var day=today-i*DAY,n=r()<q?(r()<.3?2:1):0;
+    for(var k=0;k<n;k++){
+      var s=day+Math.floor(r()*20*HR)+HR,d=Math.round(5+r()*dmax)*MIN,e=s+d;
+      if(e>Date.now()-5*MIN)continue;
+      outs.push({s:s,e:e});
+      if(r()<.45)ev.push({t:s-15*MIN,m:id,type:'stale',st:'stale',msg:'No successful HTTP check for 15 min'});
+      ev.push({t:s,m:id,type:'outage',st:'unreachable',dur:d/MIN,msg:'HTTP check timed out after 5 s'});
+      ev.push({t:e,m:id,type:'recovery',st:'reachable',msg:'Admin interface reachable again after '+dur(d/MIN)});
+    }
+    if(r()<.05)ev.push({t:day+9*HR,m:id,type:'error',st:'error',msg:'Monitor could not complete the run (sample)'});
+    if(i===20||i===9)ev.push({t:day+8*HR+30*MIN,m:id,type:'system',st:'unknown',msg:'Monitoring interval changed (sample)'});
+  }
+  ev=ev.filter(function(e){return e.t<Date.now()});
+  HIST[id]={outs:outs,events:ev,base:base,seed:seed};
+}
+genHist('m1',.2,44,11,45);
+genHist('m2',.5,102,29,70);
+function downIn(id,a,b){var h=HIST[id],t=0;h.outs.forEach(function(o){var s=Math.max(o.s,a),e=Math.min(o.e,b);if(e>s)t+=(e-s)});return t/MIN}
+function rtAt(id,t,down){var h=HIST[id],r=rng(Math.floor(t/HR)*7+h.seed);return Math.round(h.base*(0.88+r()*.3)+(down?h.base*.6:0))}
+/* range -> bucketed points */
+function points(id,range,from,to){
+  var pts=[],now=Date.now(),i;
+  if(range==='24'){var endH=Math.floor(now/HR)*HR;for(i=23;i>=0;i--){var a=endH-i*HR,b=a+HR;var dn=downIn(id,a,Math.min(b,now));pts.push({a:a,b:b,label:pad(new Date(a).getHours())+':00',up:100-dn/60*100,rt:rtAt(id,a,dn>0),down:dn,mins:60})}}
+  else{var days=range==='custom'?Math.max(1,Math.round((startDay(to)-startDay(from))/DAY)+1):+range,last=range==='custom'?startDay(to):startDay(now);for(i=days-1;i>=0;i--){var a2=last-i*DAY,b2=a2+DAY,eb=Math.min(b2,now),mins=(eb-a2)/MIN;var dn2=downIn(id,a2,eb);var outN=HIST[id].outs.filter(function(o){return o.s>=a2&&o.s<b2}).length;pts.push({a:a2,b:b2,label:dShort(a2),up:100-dn2/Math.max(mins,1)*100,rt:rtAt(id,a2+12*HR,dn2>0),down:dn2,mins:mins,outs:outN})}}
+  return pts;
+}
+function summarize(pts){var d=0,m=0,o=0,rt=0;pts.forEach(function(p){d+=p.down;m+=p.mins;o+=(p.outs||0);rt+=p.rt});return {down:d,up:100-d/Math.max(m,1)*100,outs:o,rt:pts.length?rt/pts.length:0}}
+
+/* ---------- state ---------- */
+var PRE={reachable:{zt:'recent',seen:1,ok:1},stale:{zt:'stale',seen:14,ok:180},unreachable:{zt:'recent',seen:2,ok:25},unknown:{zt:'unknown',seen:null,ok:null},error:{zt:'recent',seen:1,ok:120}};
+function setStatus(m,st){var p=PRE[st];m.status=st;m.zt=p.zt;m.seenAt=p.seen==null?null:Date.now()-p.seen*MIN;m.okAt=p.ok==null?null:Date.now()-p.ok*MIN}
+function mkM(o){var m=Object.assign({loc:'',desc:'',tags:[],ztNet:'',ztMember:'',hist:false,monitor:true,ver:''},o);setStatus(m,o.status||'unknown');return m}
+var S={
+  route:'login',auth:false,collapsed:false,drawer:false,menu:false,theme:'system',view:'normal',
+  login:{email:'operator@example.com',pw:'demo',show:false,loading:false,err:'',fe:{}},
+  forgot:{email:'',sent:false,err:''},tfa:{code:'',err:''},
+  machines:[
+    mkM({id:'m1',name:'PisoWiFi 01',loc:'Location not set (demo)',sw:'WiFi5Soft',ver:'v3.5.84',ip:'192.168.194.82',path:'/admin',tags:['demo','primary'],hist:true,status:'reachable',did:'demo-m1-0001'}),
+    mkM({id:'m2',name:'PisoWiFi 02',loc:'Location not set (demo)',sw:'WiFi5Soft',ver:'',ip:'192.168.194.127',path:'/admin',tags:['demo'],hist:true,status:'stale',did:'demo-m2-0002'})],
+  sel:'m1',seq:2,
+  mq:'',mstatus:'all',msort:'name',
+  dash:{range:'14'},hide:{},
+  hist:{m:'all',range:'14',from:'',to:'',status:'all',ev:'all',page:0},
+  rep:{period:'weekly',sort:'up',dir:-1},
+  remote:{m:'m1',phase:'idle',step:-1,attempt:1,outcome:'auto',session:false,fail:-1},
+  auto:{tab:'rules',hf:'all',rule:'outage',rules:{outage:true,recovery:true,daily:false,weekly:false}},
+  set:{sec:'profile',profile:{name:'Operator',email:'operator@example.com',err:{}},pw:{cur:'',nw:'',cf:'',err:{}},tfaOn:false,tfaSetup:false,tfaCode:'',tfaErr:'',
+       mon:{interval:'60',timeout:'5',thr:'3',err:{}},notif:{email:false,tg:false,offline:true,recovery:true,quiet:false},
+       sessions:[{id:'s1',name:'This browser',meta:'Sample · active now',cur:true},{id:'s2',name:'Phone',meta:'Sample · 2 days ago'},{id:'s3',name:'Laptop',meta:'Sample · 6 days ago'}]},
+  extraEvents:[],modal:null,busy:false
+};
+try{var th=localStorage.getItem('pw-theme');if(th==='light'||th==='dark')S.theme=th}catch(e){}
+function mById(id){return S.machines.filter(function(m){return m.id===id})[0]}
+function selM(){return mById(S.sel)||S.machines[0]||null}
+function addEvent(m,type,st,msg){S.extraEvents.push({t:Date.now(),m:m.id,type:type,st:st,msg:msg})}
+function allEvents(){var a=[];S.machines.forEach(function(m){if(HIST[m.id])a=a.concat(HIST[m.id].events)});a=a.concat(S.extraEvents.filter(function(e){return mById(e.m)}));return a.sort(function(x,y){return y.t-x.t})}
+function mName(id){var m=mById(id);return m?m.name:'Removed machine'}
+var EVICON={outage:['bad','x'],recovery:['ok','check'],stale:['warn','alert'],error:['bad','alert'],system:['info','settings'],check:['info','refresh']};
+var EVLABEL={outage:'Outage',recovery:'Recovery',stale:'Stale',error:'Monitoring error',system:'System',check:'Demo check'};
+var STBADGE={unreachable:'unreachable',reachable:'reachable',stale:'stale',error:'error',unknown:'unknown',system:'unknown'};
+var NAV=[['dash','dashboard','Dashboard'],['machines','server','My PisoWiFi'],['detail','pulse','Machine Details'],['remote','shield','Remote Administration'],['history','history','Monitoring History'],['reports','chart','Reports & Analytics'],['auto','zap','Automations / Integrations'],['settings','settings','Settings']];
+var TITLES={dash:['Dashboard','Overview of your registered PisoWiFi machines'],machines:['My PisoWiFi','Register, edit and review machines'],detail:['Machine Details','Status, history and actions'],remote:['Remote Administration','Prototype only · not operational yet'],history:['Monitoring History','Checks, outages and events (sample data)'],reports:['Reports & Analytics','Reliability trends and summaries (sample data)'],auto:['Automations / Integrations','Future n8n and Telegram automation · Coming Soon'],settings:['Settings','Account, monitoring and integrations']};
+var LASTROUTE=null;
+/* ---------- charts ---------- */
+var CH={};
+function lineChart(id,cfg){CH[id]=cfg;return '<div class="cw" data-chart="'+id+'" data-kind="line" role="img" aria-label="'+esc(cfg.alt||'Sample chart')+'"></div>'}
+function barChart(id,cfg){CH[id]=cfg;return '<div class="cw" data-chart="'+id+'" data-kind="bar" role="img" aria-label="'+esc(cfg.alt||'Sample bar chart')+'"></div>'}
+function legend(id,series){return '<div class="pw-legend" style="margin-top:8px">'+series.map(function(s){var off=S.hide[id+s.id],bar=s.cls.charAt(0)==='b';return '<button type="button" data-act="legend" data-key="'+id+s.id+'" aria-pressed="'+(!off)+'" title="Show or hide '+esc(s.name)+'">'+(bar?'<i class="sq" style="background:var(--'+(s.cls==='b1'?'chart-1':'chart-2')+')"></i>':'<i class="'+(s.cls==='l2'?'d2':'')+'"></i>')+esc(s.name)+'</button>'}).join('')+'</div>'}
+function drawCharts(){
+  var els=document.querySelectorAll('.cw');
+  for(var k=0;k<els.length;k++){var el=els[k],cfg=CH[el.dataset.chart];if(!cfg)continue;var w=Math.max(260,Math.floor(el.clientWidth)||320),h=w<420?210:250;el._w=w;
+    if(el.dataset.kind==='line'){var vis=cfg.series.filter(function(s){return !S.hide[el.dataset.chart+s.id]});
+      var all=[];vis.forEach(function(s){all=all.concat(s.v)});if(!all.length)all=[cfg.min,cfg.max];
+      var mn=cfg.min,mx=cfg.max;
+      var svg=P.line({w:w,h:h,labels:cfg.labels,min:mn,max:mx,ticks:cfg.ticks||4,unit:cfg.unit,series:vis.map(function(s){return {v:s.v,cls:s.cls,area:s.cls==='l1'&&vis.length<3}}),alt:cfg.alt});
+      el.innerHTML=svg.replace('</svg>','<line class="cur" x1="0" x2="0" y1="12" y2="'+(h-26)+'"/></svg>');
+    }else{el.innerHTML=drawBars(cfg,w,h,el.dataset.chart)}
+  }
+}
+function drawBars(cfg,w,h,id){var L=34,B=26,T=10,ih=h-T-B,n=cfg.groups.length,gw=(w-L-8)/n,vis=cfg.series.filter(function(s){return !S.hide[id+s.id]}),bw=Math.min(24,gw/(vis.length+1)),mx=Math.max(1,cfg.max),nt=mx<=4?mx:4,s='<svg class="pw-chart" viewBox="0 0 '+w+' '+h+'">';
+  if(mx>4&&cfg.integer!==false)mx=Math.ceil(mx/4)*4;for(var t=0;t<=nt;t++){var y=T+ih-ih*t/nt;s+='<line class="grid" x1="'+L+'" x2="'+(w-8)+'" y1="'+y+'" y2="'+y+'"/><text x="'+(L-6)+'" y="'+(y+4)+'" text-anchor="end">'+Math.round(mx*t/nt)+'</text>'}
+  cfg.groups.forEach(function(g,i){var cx=L+gw*i+gw/2,x0=cx-vis.length*bw/2;vis.forEach(function(se,j){var v=g.v[se.id]||0,bh=v/mx*ih;s+='<rect class="'+se.cls+'" x="'+(x0+j*bw+1)+'" y="'+(T+ih-bh)+'" width="'+(bw-2)+'" height="'+Math.max(bh,0)+'" rx="4" data-tip="'+esc(g.label+' · '+se.name+': '+v+' '+(cfg.unit||''))+'"/>'});s+='<text x="'+cx+'" y="'+(h-6)+'" text-anchor="middle">'+esc(g.label)+'</text>'});
+  return s+'</svg>'}
+function strip(arr,tips){var w=600,g=2,cw=(w-g*(arr.length-1))/arr.length;return '<svg class="pw-chart" viewBox="0 0 '+w+' 32" role="img" aria-label="Sample status timeline">'+arr.map(function(k,i){return '<rect class="s-'+k+'" x="'+(i*(cw+g)).toFixed(1)+'" y="0" width="'+cw.toFixed(1)+'" height="32" rx="3" data-tip="'+esc(tips[i])+'"/>'}).join('')+'</svg>'}
+function uptimeBounds(list){var m=100;list.forEach(function(v){if(v<m)m=v});return Math.max(0,Math.floor(m)-2)}
+/* series builder for machines with sample history */
+function seriesFor(ids,range,metric,from,to){var out=[],labels=[],i=0;ids.forEach(function(id){var m=mById(id);if(!m||!m.hist)return;var pts=points(id,range,from,to);labels=pts.map(function(p){return p.label});out.push({id:id,name:m.name,cls:id==='m1'?'l1':'l2',v:pts.map(function(p){return metric==='up'?Math.round(Math.max(p.up,0)*10)/10:p.rt}),pts:pts});i++});return {labels:labels,series:out}}
+function chartCfg(ids,range,metric,from,to,alt){var d=seriesFor(ids,range,metric,from,to);if(!d.series.length)return null;var all=[];d.series.forEach(function(s){all=all.concat(s.v)});var mn,mx;if(metric==='up'){mn=uptimeBounds(all);mx=100}else{mn=0;mx=Math.ceil(Math.max.apply(null,all)/20)*20;}d.min=mn;d.max=mx;d.unit=metric==='up'?'%':' ms';d.alt=alt;return d}
+var RANGES=[['24','24 h'],['7','7 d'],['14','14 d'],['30','30 d']];
+function seg(act,cur,items,label){return '<div class="seg-wrap"><div class="pw-seg" role="group" aria-label="'+label+'">'+items.map(function(r){return '<button type="button" data-act="'+act+'" data-v="'+r[0]+'" aria-pressed="'+(cur===r[0])+'">'+r[1]+'</button>'}).join('')+'</div></div>'}
+
+/* ---------- shared UI ---------- */
+function banner(kind,ic,html){return '<div class="pw-banner '+kind+'" role="'+(kind==='bad'?'alert':'note')+'">'+I(ic)+'<div>'+html+'</div></div>'}
+function demoBanner(t,d){return banner('info','info','<strong>'+(t||'Demo data.')+'</strong> '+(d||'Numbers, events and charts here are samples for the design prototype. Nothing is measured from real machines.'))}
+function empty(tone,ic,title,desc,btn){return '<div class="pw-empty"><span class="pw-empty-ic '+tone+'">'+I(ic,26)+'</span><h2 class="pw-h2">'+title+'</h2><p class="pw-muted" style="max-width:380px">'+desc+'</p>'+(btn||'')+'</div>'}
+function errorState(){return empty('bad','alert','Something went wrong','The demo could not load this page (simulated error). Nothing was lost.','<button class="pw-btn secondary" data-act="view" data-v="normal">'+I('refresh')+'Try again</button>')}
+function skeleton(kind){var k='<div class="pw-grid pw-g4" style="gap:16px">'+[1,2,3,4].map(function(){return '<div class="pw-card pw-stack" style="gap:12px"><div class="pw-skel" style="width:50%"></div><div class="pw-skel" style="height:30px;width:40%"></div><div class="pw-skel" style="width:70%"></div></div>'}).join('')+'</div>';
+  var c='<div class="pw-card pw-stack" style="gap:14px"><div class="pw-skel" style="width:35%;height:18px"></div><div class="pw-skel" style="height:180px"></div><div class="pw-skel" style="width:60%"></div></div>';
+  return '<div aria-busy="true" aria-label="Loading">'+(kind==='kpi'?k:'')+'<div class="pw-grid pw-g2">'+c+c+'</div></div>'}
+function stateBar(extra){return '<div class="statebar"><label class="pw-small pw-muted" for="stsel">Preview state</label><select id="stsel" class="pw-select" data-bind="view" aria-label="Preview page state"><option value="normal"'+(S.view==='normal'?' selected':'')+'>Normal</option><option value="loading"'+(S.view==='loading'?' selected':'')+'>Loading</option><option value="empty"'+(S.view==='empty'?' selected':'')+'>Empty</option><option value="error"'+(S.view==='error'?' selected':'')+'>Error</option></select>'+(extra||'')+'</div>'}
+function head(extraBtns,withState){return '<div class="pw-page-head"><div class="pw-row pw-wrap">'+(withState===false?'':stateBar())+'</div><div class="pw-row pw-wrap">'+(extraBtns||'')+'</div></div>'}
+function kpi(ic,tone,label,value,sub){return P.kpi(ic,tone,label,value,sub)}
+function eventList(list,n){if(!list.length)return '<p class="pw-muted">No events yet.</p>';return '<ul class="pw-events">'+list.slice(0,n||5).map(function(e){var x=EVICON[e.type]||EVICON.system;return '<li><span class="pw-ev-ic '+x[0]+'">'+I(x[1],16)+'</span><div class="pw-grow"><div style="font-weight:600">'+esc(mName(e.m))+'</div><div class="pw-muted" style="font-size:13px">'+esc(e.msg)+'</div></div><span class="pw-small pw-muted" style="white-space:nowrap">'+ago(e.t)+'</span></li>'}).join('')+'</ul>'}
+function sw(on,act,key,label,dis){return '<button type="button" class="pw-toggle '+(on?'on':'')+'" role="switch" aria-checked="'+on+'" aria-label="'+esc(label)+'" data-act="'+act+'" data-key="'+key+'"'+(dis?' disabled':'')+'></button>'}
+function fld(id,label,val,o){o=o||{};var st=o.err?'err':(o.ok?'ok':'');var inp='<input class="pw-input'+(o.mono?' pw-mono':'')+'" id="'+id+'" data-bind="'+(o.bind||'form')+'" data-k="'+(o.k||id)+'" value="'+esc(val)+'" type="'+(o.type||'text')+'"'+(o.ph?' placeholder="'+esc(o.ph)+'"':'')+(o.dis?' disabled':'')+(o.err?' aria-invalid="true" aria-describedby="'+id+'-m"':(o.help?' aria-describedby="'+id+'-m"':''))+(o.ac?' autocomplete="'+o.ac+'"':'')+(o.mx?' maxlength="'+o.mx+'"':'')+'>';
+  if(o.wrap)inp=o.wrap(inp);return '<div class="pw-field '+st+'"><label for="'+id+'">'+label+'</label>'+inp+(o.err?'<div id="'+id+'-m" class="pw-msg-err">'+I('alert',14)+esc(o.err)+'</div>':(o.help?'<div id="'+id+'-m" class="pw-help">'+o.help+'</div>':''))+'</div>'}
+function sel(id,label,val,opts,o){o=o||{};return '<div class="pw-field'+(o.err?' err':'')+'"><label for="'+id+'">'+label+'</label><select class="pw-select" id="'+id+'" data-bind="'+(o.bind||'form')+'" data-k="'+(o.k||id)+'">'+opts.map(function(x){return '<option value="'+esc(x[0])+'"'+(String(x[0])===String(val)?' selected':'')+'>'+esc(x[1])+'</option>'}).join('')+'</select>'+(o.help?'<div class="pw-help">'+o.help+'</div>':'')+'</div>'}
+function counts(){var c={tot:S.machines.length,ok:0,bad:0,ver:0};S.machines.forEach(function(m){if(m.status==='reachable')c.ok++;else if(m.status==='unreachable'||m.status==='error')c.bad++;else c.ver++});return c}
+
+/* ---------- auth screens ---------- */
+function brandRow(inv){return '<div class="pw-row" style="gap:10px"><span class="pw-logo-mark" '+(inv?'style="background:var(--on-hero);color:var(--hero)"':'')+'>'+I('wifi',19)+'</span><strong style="font-size:16px">PisoWiFi Monitoring</strong></div>'}
+function authShell(inner){return '<div class="pw-auth"><div class="pw-auth-hero">'+brandRow(true)+'<div><div style="font:700 36px/42px var(--font-sans);letter-spacing:-.02em;max-width:440px">Know when your PisoWiFi is down.</div><p style="margin-top:16px;max-width:420px;opacity:.92;font-size:15px;line-height:24px">Monitor machines, review history and, in a later phase, reach each admin panel securely from one place.</p></div><div class="pw-small" style="opacity:.92">Prototype · Demo data · No real sign-in</div><svg class="rings" width="420" height="420" viewBox="0 0 420 420" fill="none" stroke="currentColor" stroke-width="14" aria-hidden="true"><circle cx="210" cy="210" r="60"/><circle cx="210" cy="210" r="130"/><circle cx="210" cy="210" r="200"/></svg></div><div class="pw-auth-form"><main id="main" class="pw-auth-card"><div class="login-m pw-row" style="gap:10px">'+brandRow()+'</div>'+inner+'</main></div></div>'}
+function viewLogin(){var L=S.login;return authShell('<div><h1 style="font:650 26px/32px var(--font-sans);letter-spacing:-.015em">Welcome back</h1><p class="pw-muted" style="margin-top:6px">Sign in to your PisoWiFi Monitoring workspace.</p></div>'+
+ '<form data-form="login" class="pw-stack" style="gap:16px" novalidate>'+(L.err?banner('bad','alert','<strong>'+esc(L.err)+'</strong>'):'')+
+ fld('l-email','Username or email',L.email,{bind:'login',k:'email',err:L.fe.email,ac:'username'})+
+ fld('l-pw','Password',L.pw,{bind:'login',k:'pw',type:L.show?'text':'password',err:L.fe.pw,ac:'current-password',wrap:function(i){return '<div class="pw-input-wrap">'+i+'<button type="button" data-act="showpw" aria-label="'+(L.show?'Hide':'Show')+' password" aria-pressed="'+L.show+'">'+I(L.show?'eyeoff':'eye')+'</button></div>'}})+
+ '<div class="pw-row pw-between pw-wrap"><button type="button" class="pw-check" role="checkbox" aria-checked="'+(L.remember!==false)+'" data-act="remember" style="border:0;background:none;padding:0;color:inherit;font:inherit"><span class="pw-box'+(L.remember!==false?' on':'')+'" aria-hidden="true">'+(L.remember!==false?I('check',14):'')+'</span>Remember me</button><button type="button" class="rowlink" style="color:var(--brand);font-size:13px" data-act="go" data-to="forgot">Forgot password?</button></div>'+
+ '<button class="pw-btn primary block'+(L.loading?' loading':'')+'" type="submit"'+(L.loading?' disabled':'')+' style="min-height:46px">'+(L.loading?'<span class="pw-spin"></span>Signing in…':'Sign in')+'</button></form>'+
+ banner('info','info','<span style="font-size:12px">Prototype sign-in. Use any email with the password <strong>demo</strong>. No account is checked.'+(S.set.tfaOn?' Two-factor is on: the code is <strong>123456</strong>.':'')+'</span>')+
+ '<button class="pw-btn ghost" data-act="go" data-to="2fa" style="align-self:flex-start">Preview the 2FA screen</button>')}
+function viewForgot(){var F=S.forgot;return authShell(F.sent?'<span class="pw-ev-ic ok" style="width:52px;height:52px">'+I('mail',24)+'</span><div><h1 class="pw-h1">Check your email</h1><p class="pw-muted" style="margin-top:6px">If an account exists for <strong>'+esc(F.email)+'</strong>, reset instructions would be sent. Nothing was actually sent in this prototype.</p></div><button class="pw-btn secondary" data-act="resend">Resend (demo)</button><button class="pw-btn ghost" data-act="go" data-to="login">Back to sign in</button>':
+ '<div><h1 class="pw-h1">Reset your password</h1><p class="pw-muted" style="margin-top:6px">Enter your email and we will describe the next step. Prototype only, no email is sent.</p></div><form data-form="forgot" class="pw-stack" style="gap:16px" novalidate>'+fld('f-email','Email',F.email,{bind:'forgot',k:'email',err:F.err,ph:'you@example.com',ac:'email'})+'<button class="pw-btn primary block" type="submit" style="min-height:46px">'+I('mail')+'Send reset link</button></form><button class="pw-btn ghost" data-act="go" data-to="login">Back to sign in</button>')}
+function view2fa(){var T=S.tfa;return authShell('<div><h1 class="pw-h1">Enter your 6-digit code</h1><p class="pw-muted" style="margin-top:6px">Open your authenticator app and type the current code. This is a UI preview of future two-factor sign-in. The demo code is <strong>123456</strong>.</p></div><form data-form="tfa" class="pw-stack" style="gap:16px" novalidate><div class="pw-field '+(T.err?'err':'')+'"><label for="otp">Verification code</label><input id="otp" class="pw-otp-in" inputmode="numeric" autocomplete="one-time-code" maxlength="6" data-bind="tfa" data-k="code" value="'+esc(T.code)+'" placeholder="······" '+(T.err?'aria-invalid="true" aria-describedby="otp-m"':'')+'>'+(T.err?'<div id="otp-m" class="pw-msg-err">'+I('alert',14)+esc(T.err)+'</div>':'')+'</div><button class="pw-btn primary block" type="submit" style="min-height:46px">Verify</button></form><div class="pw-row pw-between pw-wrap"><button class="rowlink" style="color:var(--brand);font-size:13px" data-act="toast" data-msg="Backup codes are not available in the prototype.">Use a backup code</button><button class="rowlink" style="color:var(--brand);font-size:13px" data-act="go" data-to="login">Back to sign in</button></div>')}
+
+/* ---------- shell ---------- */
+function navHTML(drawer){return '<nav class="pw-nav" aria-label="Main">'+NAV.map(function(n){var cur=S.route===n[0];return '<a href="#" data-act="nav" data-to="'+n[0]+'" '+(cur?'aria-current="page"':'')+' title="'+n[2]+'">'+I(n[1],19)+'<span class="nl">'+n[2]+'</span></a>'}).join('')+'</nav>'}
+function effTheme(){return S.theme!=='system'?S.theme:(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
+function initials(){var n=(S.set.profile.name||'O').trim().split(/\s+/);return (n[0][0]+(n[1]?n[1][0]:'')).toUpperCase()}
+function shell(content){var t=TITLES[S.route],dark=effTheme()==='dark';
+ return '<a class="skip" href="#main" data-act="skip">Skip to content</a><div class="pw-app'+(S.collapsed?' collapsed':'')+'"><aside class="pw-side" aria-label="Sidebar"><div class="pw-logo">'+P.logo()+'<span class="pw-logo-t">PisoWiFi Monitoring</span></div>'+navHTML()+'<button class="collapse-btn" data-act="collapse" aria-expanded="'+(!S.collapsed)+'" aria-label="'+(S.collapsed?'Expand':'Collapse')+' sidebar" title="'+(S.collapsed?'Expand':'Collapse')+' sidebar">'+I('chevron',19).replace('class="pw-ic"','class="pw-ic fl"')+'<span class="nl">Collapse</span></button>'+P.sideFoot+'</aside>'+
+ '<div class="pw-main-col"><header class="pw-top"><button class="pw-icon-btn burger" data-act="drawer" aria-label="Open navigation menu" aria-expanded="'+S.drawer+'">'+I('menu')+'</button><div class="pw-grow"><h1 class="pw-h1">'+t[0]+'</h1><div class="pw-small pw-muted">'+t[1]+'</div></div>'+
+ '<span class="pw-badge info hide-sm">'+I('info',14)+'Demo data</span>'+
+ '<label class="pw-search">'+I('search',18)+'<input id="gsearch" data-bind="mq" value="'+esc(S.mq)+'" placeholder="Search machines…" aria-label="Search machines"></label>'+
+ '<button class="pw-icon-btn" data-act="refresh" aria-label="Refresh demo data" title="Refresh (demo)">'+I('refresh')+'</button>'+
+ '<button class="pw-icon-btn" data-act="theme" aria-label="Switch to '+(dark?'light':'dark')+' theme" title="Switch to '+(dark?'light':'dark')+' theme">'+I(dark?'sun':'moon')+'</button>'+
+ '<div class="menu-wrap"><button class="who" data-act="menu" aria-haspopup="true" aria-expanded="'+S.menu+'" aria-label="Account menu"><span class="pw-avatar">'+esc(initials())+'</span><span class="wt" style="line-height:16px;text-align:left"><span class="pw-small" style="color:var(--ink);display:block">'+esc(S.set.profile.name)+'</span><span class="pw-small pw-muted" style="display:block">Owner</span></span>'+I('chevron',16)+'</button>'+(S.menu?'<div class="menu" role="menu"><div class="mi pw-small pw-muted" style="min-height:32px">'+esc(S.set.profile.email)+'</div><hr><button role="menuitem" data-act="open-set" data-sec="profile">'+I('user')+'Profile</button><button role="menuitem" data-act="open-set" data-sec="security">'+I('lock')+'Security</button><button role="menuitem" data-act="theme">'+I(dark?'sun':'moon')+(dark?'Light':'Dark')+' theme</button><hr><button role="menuitem" data-act="logout">'+I('logout')+'Sign out</button></div>':'')+'</div></header>'+
+ '<main id="main" class="pw-page" tabindex="-1">'+content+'</main></div></div>'+
+ (S.drawer?'<div class="drawer-wrap" role="dialog" aria-modal="true" aria-label="Navigation"><div class="pw-drawer-panel"><div class="pw-row pw-between" style="padding:4px 8px 14px"><div class="pw-row" style="gap:10px">'+P.logo()+'<strong>PisoWiFi Monitoring</strong></div><button class="pw-icon-btn" data-act="drawer" aria-label="Close navigation menu">'+I('x')+'</button></div>'+navHTML(true)+P.sideFoot+'</div><button class="pw-drawer-scrim" data-act="drawer" aria-label="Close navigation"></button></div>':'')}
+/* ---------- dashboard ---------- */
+function viewDash(){
+ if(S.view==='loading')return head('',true)+skeleton('kpi');
+ if(S.view==='error')return head('',true)+errorState();
+ if(S.view==='empty'||!S.machines.length)return head('',true)+empty('','server','No machines yet','Add your first PisoWiFi to start building the overview.','<button class="pw-btn primary" data-act="add">'+I('plus')+'Add machine</button>');
+ var c=counts(),ids=S.machines.map(function(m){return m.id}),cfg=chartCfg(ids,S.dash.range,'up',null,null,'Sample uptime chart'),withHist=S.machines.filter(function(m){return m.hist}).length;
+ var unreach=S.machines.filter(function(m){return m.status==='unreachable'||m.status==='error'});
+ var avg='—',sub='Not enough checks yet';
+ if(withHist){var tot=0;S.machines.forEach(function(m){if(m.hist)tot+=summarize(points(m.id,S.dash.range)).up});avg=(tot/withHist).toFixed(1)+'%';sub='Sample · '+(S.dash.range==='24'?'24 hours':S.dash.range+' days')}
+ var cards=S.machines.slice(0,4).map(machineCard).join('');
+ return head('<button class="pw-btn primary" data-act="add">'+I('plus')+'Add machine</button>',true)+demoBanner()+
+ (unreach.length?banner('bad','x','<strong>'+esc(unreach.map(function(m){return m.name}).join(', '))+(unreach.length>1?' are':' is')+' unreachable.</strong> The last HTTP check failed. <button class="rowlink" style="color:var(--brand)" data-act="open-detail" data-id="'+unreach[0].id+'">View details</button>'):'')+
+ '<div class="pw-grid pw-g4" style="gap:16px">'+kpi('server','','Total machines',c.tot,'Registered · demo')+kpi('check','ok','Reachable',c.ok,'Admin HTTP check passed')+kpi('x','bad','Unreachable',c.bad,c.bad?'Needs attention':'No failed checks right now')+kpi('alert','warn','Need verification',c.ver,'Stale or unknown')+'</div>'+
+ '<div class="pw-grid pw-g-main"><div class="pw-stack" style="gap:24px;min-width:0"><div class="pw-card"><div class="pw-card-head"><div><h2 class="pw-h2">Monitoring overview</h2><div class="pw-small pw-muted">Measured uptime per machine · hover the chart for values</div></div><div class="pw-row pw-wrap">'+B('sample')+seg('dash-range',S.dash.range,RANGES,'Range')+'</div></div>'+
+ '<div class="pw-grid pw-g3" style="gap:16px;margin-bottom:12px"><div><div class="pw-label">Measured uptime</div><div class="pw-kpi">'+avg+'</div><div class="pw-small pw-muted">'+sub+'</div></div>'+S.machines.filter(function(m){return m.hist}).slice(0,2).map(function(m){return '<div><div class="pw-label">'+esc(m.name)+'</div><div class="pw-kpi">'+summarize(points(m.id,S.dash.range)).up.toFixed(1)+'%</div></div>'}).join('')+(S.machines.some(function(m){return !m.hist})?'<div><div class="pw-label">New machines</div>'+B('nodata')+'</div>':'')+'</div>'+
+ (cfg?lineChart('dash',cfg)+legend('dash',cfg.series):empty('mute','chart','No chart yet','Machines need sample history. New machines show “Not enough checks”.'))+'</div>'+
+ '<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Quick machines</h2><button class="rowlink" style="color:var(--brand)" data-act="nav" data-to="machines">View all</button></div><div class="pw-grid g-auto" style="gap:16px">'+cards+'</div></div></div>'+
+ '<div class="pw-stack" style="gap:24px;min-width:0"><div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Recent events</h2>'+B('demo')+'</div>'+eventList(allEvents(),5)+'<div style="margin-top:12px"><button class="pw-btn secondary sm" data-act="nav" data-to="history">Open history</button></div></div>'+
+ '<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Quick actions</h2><div class="pw-stack" style="gap:8px"><button class="pw-btn primary block" data-act="add">'+I('plus')+'Add machine</button><button class="pw-btn secondary block" data-act="checkall">'+I('refresh')+'Run check now (demo)</button><button class="pw-btn secondary block" data-act="nav" data-to="remote">'+I('shield')+'Open Remote Administration</button><button class="pw-btn secondary block" data-act="nav" data-to="reports">'+I('chart')+'View reports</button></div></div></div></div>'}
+function ztShort(m){return m.zt==='recent'?'seen '+ago(m.seenAt):m.zt==='stale'?'stale':'unknown'}
+function machineCard(m){return '<div class="pw-card flat pw-stack" style="gap:12px"><div class="pw-row pw-between" style="align-items:flex-start"><div style="min-width:0"><div class="pw-h3">'+esc(m.name)+'</div><div class="pw-small pw-muted">'+esc(m.loc||'No location')+'</div></div>'+B(m.status)+'</div><div class="pw-mono pw-muted" style="overflow-wrap:anywhere">'+esc(m.ip)+esc(m.path)+'</div><div class="pw-small pw-muted">Admin HTTP check · last success '+ago(m.okAt)+'<br>ZeroTier: '+ztShort(m)+' · Internet not verified</div><div class="pw-row pw-wrap" style="gap:8px"><button class="pw-btn secondary sm" data-act="open-detail" data-id="'+m.id+'">'+I('pulse',16)+'Details</button><button class="pw-btn secondary sm" data-act="open-remote" data-id="'+m.id+'">'+I('shield',16)+'Remote admin</button></div></div>'}
+
+/* ---------- my pisowifi ---------- */
+function filteredMachines(){var q=S.mq.trim().toLowerCase(),l=S.machines.filter(function(m){if(S.mstatus!=='all'&&m.status!==S.mstatus)return false;if(!q)return true;return (m.name+' '+m.ip+' '+m.loc+' '+m.tags.join(' ')+' '+m.sw).toLowerCase().indexOf(q)>-1});
+ var k=S.msort;l.sort(function(a,b){if(k==='name')return a.name.localeCompare(b.name,undefined,{numeric:true});if(k==='status')return a.status.localeCompare(b.status);if(k==='seen')return (b.seenAt||0)-(a.seenAt||0);if(k==='ip')return a.ip.localeCompare(b.ip,undefined,{numeric:true});return 0});return l}
+function rowActs(m){return '<div class="pw-actions"><button class="pw-act" data-act="open-detail" data-id="'+m.id+'" aria-label="View details for '+esc(m.name)+'" title="View details">'+I('pulse',18)+'</button><button class="pw-act" data-act="open-remote" data-id="'+m.id+'" aria-label="Remote admin for '+esc(m.name)+'" title="Remote admin">'+I('shield',18)+'</button><button class="pw-act" data-act="edit" data-id="'+m.id+'" aria-label="Edit '+esc(m.name)+'" title="Edit">'+I('edit',18)+'</button><button class="pw-act d" data-act="del" data-id="'+m.id+'" aria-label="Delete '+esc(m.name)+'" title="Delete">'+I('trash',18)+'</button></div>'}
+function viewMachines(){
+ if(S.view==='loading')return head('',true)+skeleton();
+ if(S.view==='error')return head('',true)+errorState();
+ var list=S.view==='empty'?[]:filteredMachines(),none=!S.machines.length||S.view==='empty';
+ var tools='<div class="pw-row pw-wrap" style="align-items:flex-end;gap:12px"><label class="pw-search" style="flex:1 1 260px;max-width:420px">'+I('search',18)+'<input id="msearch" data-bind="mq" value="'+esc(S.mq)+'" placeholder="Search by name, IP, location or tag" aria-label="Search machines"></label>'+
+  '<div style="min-width:150px">'+sel('mstatus','Status',S.mstatus,[['all','All statuses'],['reachable','Reachable'],['unreachable','Unreachable'],['stale','Stale'],['unknown','Unknown'],['error','Monitoring error']],{bind:'mstatus'})+'</div>'+
+  '<div style="min-width:150px">'+sel('msort','Sort by',S.msort,[['name','Name A–Z'],['status','Status'],['seen','Last seen'],['ip','ZeroTier IP']],{bind:'msort'})+'</div>'+
+  ((S.mq||S.mstatus!=='all')?'<button class="pw-btn ghost" data-act="mreset">Clear filters</button>':'')+'</div>';
+ var body;
+ if(none)body=empty('','server','No machines yet','Add your first PisoWiFi to start tracking it.','<button class="pw-btn primary" data-act="add">'+I('plus')+'Add machine</button>');
+ else if(!list.length)body=empty('mute','search','No machines match','Try another search or clear the filters.','<button class="pw-btn secondary" data-act="mreset">Clear filters</button>');
+ else{
+  var rows=list.map(function(m){return '<tr><td><button class="rowlink" data-act="open-detail" data-id="'+m.id+'">'+esc(m.name)+'</button><div class="pw-small pw-muted">'+esc(m.loc||'No location')+'</div></td><td>'+esc(m.sw)+'<div class="pw-small pw-muted">'+esc(m.ver||'Version unknown')+'</div></td><td><span class="pw-mono">'+esc(m.ip)+'</span><div class="pw-mono pw-muted">'+esc(m.path)+'</div></td><td>'+B(m.status)+'<span class="zt-line">ZeroTier: '+ztShort(m)+'</span><span class="zt-line">Internet: not verified</span></td><td class="nw">'+ago(m.seenAt)+'</td><td class="nw">'+ago(m.okAt)+'</td><td>'+rowActs(m)+'</td></tr>'}).join('');
+  var cards=list.map(function(m){return '<div class="pw-card pw-stack" style="gap:10px"><div class="pw-row pw-between" style="align-items:flex-start"><div style="min-width:0"><button class="rowlink pw-h3" data-act="open-detail" data-id="'+m.id+'">'+esc(m.name)+'</button><div class="pw-small pw-muted">'+esc(m.loc||'No location')+'</div></div>'+B(m.status)+'</div><dl class="pw-kv" style="margin:0"><dt>Software</dt><dd>'+esc(m.sw)+' '+esc(m.ver||'')+'</dd><dt>ZeroTier IP</dt><dd class="pw-mono">'+esc(m.ip)+'</dd><dt>Admin path</dt><dd class="pw-mono">'+esc(m.path)+'</dd><dt>ZeroTier last seen</dt><dd>'+ago(m.seenAt)+'</dd><dt>Internet</dt><dd>Not yet verified</dd><dt>Last successful check</dt><dd>'+ago(m.okAt)+'</dd></dl><div class="pw-row pw-wrap" style="gap:8px"><button class="pw-btn secondary sm" style="min-height:40px" data-act="open-detail" data-id="'+m.id+'">Details</button><button class="pw-btn secondary sm" style="min-height:40px" data-act="open-remote" data-id="'+m.id+'">Remote admin</button><button class="pw-btn secondary sm" style="min-height:40px" data-act="edit" data-id="'+m.id+'">Edit</button><button class="pw-btn danger-outline sm" style="min-height:40px" data-act="del" data-id="'+m.id+'">Delete</button></div></div>'}).join('');
+  body='<div class="t-lg"><div class="pw-tablewrap"><table class="pw-table"><thead><tr><th>Machine</th><th>Software</th><th>ZeroTier IP / path</th><th>Admin HTTP status</th><th>ZeroTier last seen</th><th>Last successful check</th><th><span class="sr">Actions</span></th></tr></thead><tbody>'+rows+'</tbody></table></div></div><div class="c-lg cardlist">'+cards+'</div><p class="pw-small pw-muted" aria-live="polite">'+list.length+' of '+S.machines.length+' machines · '+B('demo')+'</p>'}
+ return head('<button class="pw-btn primary" data-act="add">'+I('plus')+'Add machine</button>',true)+demoBanner()+tools+body}
+
+/* ---------- add / edit / delete modal ---------- */
+function blankForm(){return {name:'',loc:'',desc:'',sw:'WiFi5Soft',ver:'',ztNet:'',ip:'',path:'/admin',tags:[],tagIn:'',err:{}}}
+function openForm(id){var m=id&&mById(id);S.modal=m?{type:'form',id:id,f:{name:m.name,loc:m.loc,desc:m.desc,sw:m.sw,ver:m.ver,ztNet:m.ztNet,ip:m.ip,path:m.path,tags:m.tags.slice(),tagIn:'',err:{}}}:{type:'form',id:null,f:blankForm()};S.modal.opener=document.activeElement&&document.activeElement.id}
+var IP4=/^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/;
+function validateForm(f,id){var e={};if(!f.name.trim())e.name='Machine name is required';else if(S.machines.some(function(m){return m.id!==id&&m.name.toLowerCase()===f.name.trim().toLowerCase()}))e.name='Another machine already uses this name';
+ if(!f.ip.trim())e.ip='ZeroTier managed IP is required';else if(!IP4.test(f.ip.trim()))e.ip='Enter a full IPv4 address, e.g. 192.168.194.82';else if(S.machines.some(function(m){return m.id!==id&&m.ip===f.ip.trim()}))e.ip='This IP is already registered';
+ if(!f.path.trim()||f.path.trim()[0]!=='/')e.path='Admin path must start with /';
+ if(f.ztNet&&!/^[0-9a-f]{16}$/i.test(f.ztNet.trim()))e.ztNet='Network ID is 16 hex characters';
+ return e}
+function viewModal(){var M=S.modal;if(!M)return '';
+ if(M.type==='delete'){var m=mById(M.id);return '<div class="overlay" data-act="scrim"><div class="dialog sm" role="alertdialog" aria-modal="true" aria-labelledby="dt" aria-describedby="dd"><div class="dialog-h"><div class="pw-row" style="gap:12px"><span class="pw-ev-ic bad" style="width:44px;height:44px">'+I('trash',20)+'</span><h2 class="pw-h2" id="dt">Delete '+esc(m?m.name:'machine')+'?</h2></div></div><div class="dialog-b"><p class="pw-muted" id="dd">This removes the machine and its demo history from the prototype. This cannot be undone.</p></div><div class="dialog-f"><button class="pw-btn secondary" data-act="close" id="dcancel">Cancel</button><button class="pw-btn danger" data-act="confirm-del">'+I('trash')+'Delete machine</button></div></div></div>'}
+ if(M.type==='success')return '<div class="overlay" data-act="scrim"><div class="dialog sm" role="dialog" aria-modal="true" aria-labelledby="dt"><div class="dialog-b" style="padding:28px 24px 8px;align-items:flex-start"><span class="pw-ev-ic ok" style="width:48px;height:48px">'+I('check',24)+'</span><h2 class="pw-h2" id="dt">'+esc(M.msg)+'</h2><p class="pw-muted">Saved in the demo list only. Monitoring starts once a real backend exists. New machines show as Unknown with no checks.</p></div><div class="dialog-f"><button class="pw-btn secondary" data-act="close">Close</button>'+(M.again?'<button class="pw-btn secondary" data-act="add">Add another</button>':'')+'<button class="pw-btn primary" data-act="open-detail" data-id="'+M.id+'" id="dfirst">View machine</button></div></div></div>';
+ var f=M.f,e=f.err||{},edit=!!M.id;
+ return '<div class="overlay" data-act="scrim"><form class="dialog" data-form="machine" role="dialog" aria-modal="true" aria-labelledby="dt" novalidate><div class="dialog-h"><h2 class="pw-h2" id="dt">'+(edit?'Edit machine':'Add machine')+'</h2><button type="button" class="pw-icon-btn" data-act="close" aria-label="Close">'+I('x')+'</button></div><div class="dialog-b">'+demoBanner('Demo form.','Saved only in this prototype session. Nothing connects to ZeroTier or the machine.')+
+ '<div class="pw-grid pw-g2" style="gap:16px">'+fld('f-name','Machine name *',f.name,{k:'name',err:e.name,ph:'e.g. PisoWiFi 03'})+fld('f-loc','Location',f.loc,{k:'loc',ph:'e.g. Main store'})+
+ sel('f-sw','Software type',f.sw,[['WiFi5Soft','WiFi5Soft'],['Other','Other / unknown']],{k:'sw'})+fld('f-ver','Software version',f.ver,{k:'ver',ph:'e.g. v3.5.84',help:'Optional'})+
+ '<div class="span-all">'+fld('f-ztNet','ZeroTier network ID',f.ztNet,{k:'ztNet',mono:true,ph:'16 hex characters',err:e.ztNet,help:'Stored as text only. Not checked against ZeroTier.'})+'</div>'+
+ fld('f-ip','ZeroTier managed IP *',f.ip,{k:'ip',mono:true,ph:'192.168.194.82',err:e.ip,ok:f.ip&&!e.ip&&IP4.test(f.ip.trim())})+fld('f-path','Admin path *',f.path,{k:'path',mono:true,err:e.path,help:'The original WiFi5Soft login is still required.'})+'</div>'+
+ '<div class="pw-field"><label for="f-desc">Description</label><textarea class="pw-textarea" id="f-desc" data-bind="form" data-k="desc" placeholder="Optional notes">'+esc(f.desc)+'</textarea></div>'+
+ '<div class="pw-field"><label for="f-tag">Tags</label><div class="chips">'+f.tags.map(function(t,i){return '<span class="pw-chip">'+esc(t)+'<button type="button" data-act="tagdel" data-i="'+i+'" aria-label="Remove tag '+esc(t)+'">'+I('x',12)+'</button></span>'}).join('')+'<input id="f-tag" data-bind="tagin" value="'+esc(f.tagIn)+'" placeholder="Type a tag and press Enter"></div><div class="pw-help">Press Enter or comma to add a tag.</div></div></div>'+
+ '<div class="dialog-f"><button type="button" class="pw-btn secondary" data-act="close">Cancel</button><button class="pw-btn primary" type="submit">'+(edit?'Save changes':'Save machine')+'</button></div></form></div>'}
+/* ---------- machine details ---------- */
+function monText(){var m=S.set.mon;return 'Every '+(m.interval>=60?(m.interval/60)+' min':m.interval+' s')+' · timeout '+m.timeout+' s · Stale after '+m.thr+' missed checks'}
+function viewDetail(){
+ if(S.view==='loading')return head('',true)+skeleton('kpi');
+ if(S.view==='error')return head('',true)+errorState();
+ var m=selM();
+ if(!m||S.view==='empty')return head('',true)+empty('','server','No machine selected','Add a machine, or pick one from My PisoWiFi.','<button class="pw-btn primary" data-act="add">'+I('plus')+'Add machine</button><button class="pw-btn secondary" data-act="nav" data-to="machines">Go to My PisoWiFi</button>');
+ var ztB=B(m.zt==='recent'?'recent':m.zt==='stale'?'stale':'unknown'),ztT=m.zt==='recent'?'Member seen by ZeroTier '+ago(m.seenAt)+'.':m.zt==='stale'?'No recent ZeroTier sighting.':'Never seen by ZeroTier.';
+ var hB=B(m.status),hT={reachable:'GET '+esc(m.path)+' answered. WiFi5Soft login is still required.',stale:'No fresh HTTP check inside the threshold.',unreachable:'HTTP check timed out. ZeroTier can still look recent.',unknown:'No HTTP check has run yet.',error:'The monitor failed to run this check. This is not a machine fault.'}[m.status];
+ var blk=function(ic,tone,t,b,txt){return '<div class="pw-card flat pw-stack" style="gap:10px"><div class="pw-row"><span class="pw-stat-ic '+tone+'">'+I(ic,19)+'</span><h3 class="pw-h3 pw-grow">'+t+'</h3></div><div>'+b+'</div><div class="pw-small pw-muted">'+txt+'</div></div>'};
+ var ev=allEvents().filter(function(e){return e.m===m.id});
+ var cfg=m.hist?chartCfg([m.id],'14','rt',null,null,'Sample response time for '+m.name):null,s=m.hist?summarize(points(m.id,'14')):null;
+ var warn=m.status==='unreachable'?banner('bad','x','<strong>'+esc(m.name)+' is unreachable.</strong> The last HTTP check failed. ZeroTier shows “'+(m.zt==='recent'?'Recently Seen':'Stale')+'” separately.'):m.status==='stale'?banner('warn','alert','<strong>Data is stale.</strong> Last successful check '+ago(m.okAt)+'. Status may have changed.'):m.status==='error'?banner('bad','alert','<strong>Monitoring error.</strong> The monitor itself failed, so the machine state is unknown.'):'';
+ return head('',true)+
+ '<div class="pw-row pw-wrap" style="align-items:flex-end;gap:12px"><div style="min-width:220px;flex:1;max-width:340px">'+sel('d-m','Machine',m.id,S.machines.map(function(x){return [x.id,x.name]}),{bind:'selm'})+'</div><div style="min-width:220px;flex:1;max-width:340px">'+sel('d-sim','Simulate state (demo)',m.status,[['reachable','Reachable'],['stale','Stale'],['unreachable','Unreachable'],['unknown','Unknown'],['error','Monitoring Error']],{bind:'simstate',help:'Changes demo data only.'})+'</div></div>'+warn+
+ banner('info','info','<strong>Demo data.</strong> ZeroTier status, admin reachability and internet verification are independent. A recent ZeroTier sighting never means the internet is verified.')+
+ '<div class="pw-card"><div class="pw-row pw-between pw-wrap" style="gap:16px"><div class="pw-row" style="gap:14px;min-width:0"><span class="pw-stat-ic" style="width:52px;height:52px;border-radius:var(--radius-lg)">'+I('wifi',26)+'</span><div style="min-width:0"><h2 class="pw-h2">'+esc(m.name)+'</h2><div class="pw-muted" style="overflow-wrap:anywhere">'+esc(m.loc||'No location')+' · '+esc(m.sw)+' '+esc(m.ver||'(version unknown)')+'</div></div></div><div class="pw-row pw-wrap"><button class="pw-btn secondary" data-act="edit" data-id="'+m.id+'">'+I('edit')+'Edit machine</button><button class="pw-btn primary" data-act="open-remote" data-id="'+m.id+'">'+I('shield')+'Remote admin</button></div></div>'+
+ '<dl class="pw-kv kv2"><dt>Device ID</dt><dd class="pw-mono">'+esc(m.did||'demo-'+m.id)+'</dd><dt>ZeroTier IP</dt><dd class="pw-mono">'+esc(m.ip)+'</dd><dt>Admin path</dt><dd class="pw-mono">'+esc(m.path)+'</dd><dt>Admin HTTP status</dt><dd>'+B(m.status)+'</dd><dt>Last seen</dt><dd>'+ago(m.seenAt)+'</dd><dt>Last successful HTTP check</dt><dd>'+ago(m.okAt)+'</dd></dl></div>'+
+ '<div class="pw-grid pw-g4" style="gap:16px">'+blk('network','','ZeroTier last seen',ztB,ztT+' Placeholder, not connected to ZeroTier. This is not proof that customers have internet.')+blk('shield',m.status==='reachable'?'ok':m.status==='unreachable'||m.status==='error'?'bad':m.status==='stale'?'warn':'mute','Admin HTTP reachability',hB,hT)+blk('globe','warn','Internet verification',B('inet'),'No internet check is configured. Reachable admin does not prove internet access.')+blk('pulse',m.status==='error'?'bad':m.monitor?'ok':'mute','Monitoring health',m.status==='error'?B('error'):m.monitor?B('enabled','Healthy'):B('paused'),'Describes the monitor itself, not the machine. '+monText()+'.')+'</div>'+
+ '<div class="pw-grid pw-g-main"><div class="pw-stack" style="gap:24px;min-width:0"><div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Monitoring summary</h2>'+B('sample')+'</div>'+
+ (cfg?'<div class="pw-grid pw-g3" style="gap:16px;margin-bottom:12px"><div><div class="pw-label">Uptime 14 d</div><div class="pw-kpi">'+s.up.toFixed(1)+'%</div></div><div><div class="pw-label">Avg response</div><div class="pw-kpi">'+Math.round(s.rt)+' ms</div></div><div><div class="pw-label">Outages</div><div class="pw-kpi">'+s.outs+'</div></div></div>'+lineChart('det',cfg):empty('mute','chart','Not enough checks','This machine has no history yet. '+B('nodata')))+'</div>'+
+ '<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Recent events</h2><button class="rowlink" style="color:var(--brand)" data-act="open-hist" data-id="'+m.id+'">Open history</button></div>'+eventList(ev,5)+'</div></div>'+
+ '<div class="pw-stack" style="gap:24px;min-width:0"><div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Machine actions</h2><div class="pw-stack" style="gap:8px"><button class="pw-btn primary block" data-act="open-remote" data-id="'+m.id+'">'+I('shield')+'Open Remote Administration</button><button class="pw-btn secondary block'+(S.busy?' loading':'')+'" data-act="check" data-id="'+m.id+'"'+(S.busy?' disabled':'')+'>'+(S.busy?'<span class="pw-spin"></span>Checking…':I('refresh')+'Run check now (demo)')+'</button><button class="pw-btn secondary block" data-act="montoggle" data-id="'+m.id+'">'+I(m.monitor?'pause':'play')+(m.monitor?'Pause monitoring':'Resume monitoring')+'</button><button class="pw-btn secondary block" data-act="edit" data-id="'+m.id+'">'+I('edit')+'Edit machine</button><button class="pw-btn danger-outline block" data-act="del" data-id="'+m.id+'">'+I('trash')+'Delete machine</button></div></div>'+
+ '<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">State legend</h2><div class="pw-stack" style="gap:8px;align-items:flex-start">'+['reachable','unreachable','recent','stale','unknown','error','inet'].map(function(k){return B(k)}).join('')+'</div></div></div></div>'}
+
+/* ---------- remote administration ---------- */
+var NODES=[['user','Browser','You, on any device. No ZeroTier install needed.'],['shield','Secure Web App','This app. Signs you in and authorizes the session.'],['network','VPS ZeroTier Gateway','Future component that joins the ZeroTier network.'],['server','WiFi5Soft Admin Dashboard','The machine’s own /admin page. Its original login is still required.']];
+function remoteOutcome(m){var o=S.remote.outcome;if(o!=='auto')return o;return m.status==='reachable'?'ready':m.status==='stale'?'retryfail':'unavailable'}
+function viewRemote(){
+ if(S.view==='loading')return head('',true)+skeleton();
+ if(S.view==='error')return head('',true)+errorState();
+ var R=S.remote,m=mById(R.m)||S.machines[0];
+ if(!m||S.view==='empty')return head('',true)+empty('','shield','No machines to administer','Register a machine first.','<button class="pw-btn primary" data-act="add">'+I('plus')+'Add machine</button>');
+ var ph=R.phase,busy=ph==='prep'||ph==='retry';
+ var arch='<div class="arch" role="list" aria-label="Connection path">'+NODES.map(function(n,i){var cls=ph==='ready'?'done':ph==='idle'?'':i<R.step?'done':i===R.step&&busy?'act':'';if(R.fail===i&&(ph==='unavail'||ph==='unauth'||ph==='retry'))cls='fail';var fut=i===2;return '<div class="node '+cls+(fut?' future':'')+'" role="listitem"><span class="node-ic">'+I(n[0],18)+'</span><strong>'+n[1]+'</strong>'+(fut?B('soon'):'')+'<span class="pw-small pw-muted">'+n[2]+'</span></div>'}).join('')+'</div>';
+ var st=['Session requested from the Secure Web App','Gateway authorizes the session (future VPS)','ZeroTier path to '+esc(m.ip),'WiFi5Soft admin interface answers'];
+ var steps='<div class="pw-stepper">'+st.map(function(t,i){var k=ph==='ready'?'ok':(i<R.step?'ok':(i===R.step&&busy?'now':(R.fail===i&&(ph==='unavail'||ph==='unauth'||ph==='retry')?'bad':'')));return '<div class="pw-step"><span class="pw-step-dot '+k+'">'+(k==='ok'?I('check',14):k==='bad'?I('x',14):i+1)+'</span><div><div style="font-weight:600">'+t+'</div><div class="pw-small pw-muted">'+(k==='ok'?'Done (simulated)':k==='now'?'In progress…':k==='bad'?'Failed (simulated)':'Waiting')+'</div></div></div>'}).join('')+'</div>';
+ var head2={idle:['info','shield','Ready to simulate','Pick a machine and select Connect (simulation). No request leaves this page.'],prep:['info','refresh','Preparing secure connection…','Simulating the path to '+esc(m.name)+'. Attempt '+R.attempt+' of 2.'],retry:['warn','refresh','Still trying… (attempt 2 of 2)','The first attempt timed out. Retrying in a moment.'],ready:['ok','shield','Ready to open remote admin','Simulated session prepared for '+esc(m.ip)+esc(m.path)+'.'],unavail:['bad','x','Machine unavailable',esc(m.name)+' did not answer the simulated admin check.'],unauth:['bad','lock','Not authorized','Your account cannot open remote admin for this machine in this simulation. Ask the owner for access.']}[ph];
+ var btn=ph==='idle'?'<button class="pw-btn primary" data-act="connect">'+I('play')+'Connect (simulation)</button>':busy?'<button class="pw-btn secondary" data-act="rcancel">Cancel</button>':ph==='ready'?'<button class="pw-btn primary" data-act="ropen">'+I('external')+'Open Remote Admin</button><button class="pw-btn secondary" data-act="rreset">Start over</button>':'<button class="pw-btn secondary" data-act="connect">'+I('refresh')+'Retry</button><button class="pw-btn ghost" data-act="rreset">Reset</button>';
+ var panel=R.session&&ph==='ready'?'<div class="pw-browser"><div class="pw-browser-bar"><span class="pw-row" style="gap:6px" aria-hidden="true"><i style="width:10px;height:10px;border-radius:50%;background:var(--border-strong)"></i><i style="width:10px;height:10px;border-radius:50%;background:var(--border-strong)"></i><i style="width:10px;height:10px;border-radius:50%;background:var(--border-strong)"></i></span><div class="pw-browser-url">'+I('lock',14)+'<span class="pw-mono" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">gateway.example/'+esc(m.id)+esc(m.path)+'</span></div></div><div style="padding:36px 16px;display:grid;place-items:center;background:var(--surface-2)"><div class="pw-card" style="width:100%;max-width:360px"><div class="pw-stack" style="gap:12px;align-items:center;text-align:center"><span class="pw-badge mute">Placeholder panel</span><h3 class="pw-h2">WiFi5Soft login is required</h3><p class="pw-muted" style="font-size:13px">In the real system, the machine’s own WiFi5Soft sign-in page would load here and you would sign in with your admin credentials. This prototype shows no login form and never signs in for you.</p><div class="pw-skel" style="width:100%;height:40px"></div><div class="pw-skel" style="width:100%;height:40px"></div><button class="pw-btn primary block" disabled>Sign in (WiFi5Soft, not simulated)</button></div></div></div></div><div class="pw-row"><button class="pw-btn secondary" data-act="rend">End session</button><span class="pw-small pw-muted" id="sesstimer">Simulated session · expires in 14:59</span></div>':'';
+ var tips={idle:['Confirm the machine is joined to the ZeroTier network.','Check that the status is Reachable, not Stale.','Make sure the admin path is /admin.'],prep:['This takes a few seconds in the simulation.'],retry:['A first timeout is common when a machine is waking up.','The gateway retries once before reporting a failure.'],ready:['Opening the panel hands you to WiFi5Soft’s own login.','End the session when you are done.'],unavail:['Open Machine Details: is the admin interface Reachable or Stale?','A recent ZeroTier sighting does not prove the admin page is up.','Try again after the machine finishes rebooting.'],unauth:['Ask the workspace owner for remote admin access.','Sign out and back in to refresh your permissions.']}[ph];
+ return head('',true)+banner('warn','alert','<strong>Prototype only. Not operational yet.</strong> This screen simulates a future flow and never connects to a machine. <strong>The original WiFi5Soft login will still be required.</strong> Monitor never stores or bypasses admin credentials.')+
+ '<div class="pw-card"><div class="pw-card-head"><div><h2 class="pw-h2">How it will work</h2><div class="pw-small pw-muted">Browser → Secure Web App → Future VPS ZeroTier Gateway → WiFi5Soft Admin Dashboard</div></div>'+B('soon')+'</div>'+arch+'<p class="pw-small pw-muted" style="margin-top:12px">Users will reach both WiFi5Soft units without installing ZeroTier on their phones or computers. The gateway does not exist yet.</p></div>'+
+ '<div class="pw-grid pw-g-main" style="align-items:start"><div class="pw-stack" style="gap:24px;min-width:0"><div class="pw-card pw-stack"><div class="pw-card-head" style="margin:0"><h2 class="pw-h2">Select machine</h2>'+B('demo')+'</div><div class="pw-grid g-auto" style="gap:12px">'+S.machines.map(function(x){return '<button class="pw-card flat pw-stack'+(x.id===m.id?' sel':'')+'" style="gap:10px;text-align:left;color:inherit;font:inherit" data-act="rsel" data-id="'+x.id+'" aria-pressed="'+(x.id===m.id)+'"'+(busy?' disabled':'')+'><span class="pw-row pw-between" style="align-items:flex-start"><span class="pw-h3">'+esc(x.name)+'</span>'+B(x.status)+'</span><span class="pw-mono pw-muted" style="overflow-wrap:anywhere">'+esc(x.ip)+esc(x.path)+'</span></button>'}).join('')+'</div>'+
+ '<div style="max-width:340px">'+sel('r-out','Simulated outcome',R.outcome,[['auto','Automatic (from machine status)'],['ready','Always ready'],['retry','Retry, then ready'],['retryfail','Retry, then unavailable'],['unavailable','Unavailable'],['unauth','Unauthorized']],{bind:'routcome',help:'For previewing every connection state.'})+'</div></div>'+
+ '<div class="pw-card pw-stack"><div class="pw-row" style="gap:12px;align-items:flex-start"><span class="pw-ev-ic '+head2[0]+'" style="width:44px;height:44px">'+(busy?'<span class="pw-spin"></span>':I(head2[1],20))+'</span><div style="min-width:0"><h2 class="pw-h2" role="status" aria-live="polite">'+head2[2]+'</h2><div class="pw-muted">'+head2[3]+'</div></div></div>'+steps+'<div class="pw-row pw-wrap">'+btn+'</div>'+panel+'</div></div>'+
+ '<div class="pw-stack" style="gap:24px;min-width:0"><div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Selected machine</h2><dl class="pw-kv" style="margin:0"><dt>Name</dt><dd>'+esc(m.name)+'</dd><dt>Software</dt><dd>'+esc(m.sw)+' '+esc(m.ver||'')+'</dd><dt>Target</dt><dd class="pw-mono">'+esc(m.ip)+esc(m.path)+'</dd><dt>Admin check</dt><dd>'+B(m.status)+'</dd><dt>ZeroTier</dt><dd>'+B(m.zt==='recent'?'recent':m.zt==='stale'?'stale':'unknown')+'</dd></dl><button class="pw-btn secondary sm" style="margin-top:8px" data-act="open-detail" data-id="'+m.id+'">View machine details</button></div>'+
+ '<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Secure session</h2><dl class="pw-kv" style="margin:0"><dt>Transport</dt><dd>VPS + ZeroTier gateway '+B('soon')+'</dd><dt>Session</dt><dd>'+(ph==='ready'?'Simulated, prepared':'Not started')+'</dd><dt>Credentials</dt><dd>Never stored by Monitor</dd><dt>Login</dt><dd>WiFi5Soft login still required</dd></dl></div>'+
+ '<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:8px">Troubleshooting</h2><ul class="pw-muted" style="margin:0;padding-left:18px;font-size:13px;line-height:22px">'+tips.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ul></div></div></div>'}
+
+/* ---------- monitoring history ---------- */
+function histWindow(){var h=S.hist,now=Date.now(),a,b;if(h.range==='24'){a=now-DAY;b=now}else if(h.range==='custom'){var f=h.from?new Date(h.from+'T00:00:00').getTime():startDay(now)-13*DAY,t=h.to?new Date(h.to+'T00:00:00').getTime():startDay(now);if(f>t){var x=f;f=t;t=x}f=Math.max(f,startDay(now)-29*DAY);t=Math.min(t,startDay(now));a=f;b=Math.min(t+DAY,now);return {a:a,b:b,from:f,to:t}}else{a=startDay(now)-(+h.range-1)*DAY;b=now}return {a:a,b:b}}
+function histEvents(win){var h=S.hist;return allEvents().filter(function(e){return e.t>=win.a&&e.t<=win.b&&(h.m==='all'||e.m===h.m)&&(h.status==='all'||e.st===h.status)&&(h.ev==='all'||e.type===h.ev)})}
+function viewHistory(){
+ if(S.view==='loading')return head('',true)+skeleton('kpi');
+ if(S.view==='error')return head('',true)+errorState();
+ var H=S.hist,win=histWindow(),ids=H.m==='all'?S.machines.filter(function(m){return m.hist}).map(function(m){return m.id}):[H.m];
+ var one=H.m!=='all'?mById(H.m):null,nohist=(one&&!one.hist)||!ids.length||S.view==='empty';
+ var filt='<div class="pw-card"><div class="pw-grid g-auto" style="gap:12px;align-items:end">'+sel('h-m','Machine',H.m,[['all','All machines']].concat(S.machines.map(function(m){return [m.id,m.name]})),{bind:'hist',k:'m'})+sel('h-r','Date range',H.range,[['24','Last 24 hours'],['7','Last 7 days'],['14','Last 14 days'],['30','Last 30 days'],['custom','Custom range']],{bind:'hist',k:'range'})+
+  (H.range==='custom'?fld('h-from','From',H.from||iso(win.from||Date.now()-13*DAY),{bind:'hist',k:'from',type:'date'})+fld('h-to','To',H.to||iso(win.to||Date.now()),{bind:'hist',k:'to',type:'date'}):'')+
+  sel('h-s','Status',H.status,[['all','Any status'],['reachable','Reachable'],['unreachable','Unreachable'],['stale','Stale'],['error','Monitoring error']],{bind:'hist',k:'status'})+
+  sel('h-e','Event',H.ev,[['all','All events'],['outage','Outages'],['recovery','Recoveries'],['stale','Stale'],['error','Monitoring errors'],['system','System']],{bind:'hist',k:'ev'})+'<button class="pw-btn secondary" data-act="hreset">Reset filters</button></div></div>';
+ if(nohist)return head('',true)+demoBanner('Sample data.','History is generated for the prototype and does not reflect real machine behaviour.')+filt+empty('mute','history','No history yet',one&&!one.hist?esc(one.name)+' has no checks yet. History appears once monitoring runs.':'No sample history to show for this filter.','<button class="pw-btn secondary" data-act="hreset">Reset filters</button>');
+ var cfgU=chartCfg(ids,H.range,'up',win.from,win.to,'Sample uptime chart'),cfgR=chartCfg(ids,H.range,'rt',win.from,win.to,'Sample response time chart');
+ var tot={down:0,up:0,outs:0,rt:0},n=0;ids.forEach(function(id){var s=summarize(points(id,H.range,win.from,win.to));tot.down+=s.down;tot.up+=s.up;tot.rt+=s.rt;n++});tot.up/=n;tot.rt/=n;
+ var evs=histEvents(win),outs=allEvents().filter(function(e){return e.type==='outage'&&e.t>=win.a&&e.t<=win.b&&ids.indexOf(e.m)>-1});
+ var lastOk=ids.reduce(function(a,id){var m=mById(id);return Math.max(a,(m&&m.okAt)||0)},0);
+ var strips=ids.map(function(id){var m=mById(id),B48=48,L=win.b-win.a,arr=[],tips=[];for(var i=0;i<B48;i++){var a=win.a+L*i/B48,b=win.a+L*(i+1)/B48,k='ok';if(downIn(id,a,b)>0)k='bad';else if(HIST[id].events.some(function(e){return e.type==='stale'&&e.t>=a&&e.t<b}))k='warn';arr.push(k);tips.push(m.name+' · '+dTime(a)+' · '+({ok:'Reachable',bad:'Unreachable',warn:'Stale'}[k]))}return '<div style="margin-bottom:10px"><div class="pw-small pw-muted" style="margin-bottom:4px">'+esc(m.name)+'</div>'+strip(arr,tips)+'</div>'}).join('');
+ var pages=Math.max(1,Math.ceil(evs.length/8)),pg=Math.min(H.page,pages-1),slice=evs.slice(pg*8,pg*8+8);
+ var rows=slice.map(function(e){return '<tr><td class="nw">'+B(STBADGE[e.st]||'unknown',EVLABEL[e.type])+'</td><td class="nw" style="font-weight:600">'+esc(mName(e.m))+'</td><td class="pw-muted">'+esc(e.msg)+'</td><td class="nw">'+dTime(e.t)+'</td></tr>'}).join('');
+ var cards=slice.map(function(e){return '<div class="pw-card flat pw-stack" style="gap:6px"><div class="pw-row pw-between pw-wrap">'+B(STBADGE[e.st]||'unknown',EVLABEL[e.type])+'<span class="pw-small pw-muted">'+dTime(e.t)+'</span></div><div style="font-weight:600">'+esc(mName(e.m))+'</div><div class="pw-muted" style="font-size:13px">'+esc(e.msg)+'</div></div>'}).join('');
+ var log=evs.length?'<div class="t-md"><div class="pw-tablewrap"><table class="pw-table"><thead><tr><th>Event</th><th>Machine</th><th>Details</th><th>Time</th></tr></thead><tbody>'+rows+'</tbody></table></div></div><div class="c-md cardlist">'+cards+'</div><div class="pager"><span class="pw-small pw-muted" aria-live="polite">'+evs.length+' events · page '+(pg+1)+' of '+pages+'</span><div class="pw-row"><button class="pw-btn secondary sm" data-act="hpage" data-v="-1"'+(pg===0?' disabled':'')+'>Previous</button><button class="pw-btn secondary sm" data-act="hpage" data-v="1"'+(pg>=pages-1?' disabled':'')+'>Next</button></div></div>':empty('mute','search','No events match','Try a wider date range or other filters.','<button class="pw-btn secondary" data-act="hreset">Reset filters</button>');
+ return head('<button class="pw-btn secondary" data-act="csv">'+I('download')+'Copy CSV</button>',true)+demoBanner('Sample data.','History is generated for the prototype and does not reflect real machine behaviour.')+filt+
+ '<div class="pw-grid pw-g4" style="gap:16px">'+kpi('check','ok','Last successful check',ago(lastOk),'Latest across selection · demo')+kpi('clock','','Average response',Math.round(tot.rt)+' ms','Sample')+kpi('x','bad','Total downtime',dur(tot.down),outs.length+' outage'+(outs.length===1?'':'s')+' in range')+kpi('pulse','','Uptime',tot.up.toFixed(1)+'%','Sample')+'</div>'+
+ '<div class="pw-grid pw-g-main"><div class="pw-stack" style="gap:24px;min-width:0"><div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Timeline</h2>'+B('sample')+'</div>'+strips+'<div class="pw-legend"><span><i class="sq" style="background:var(--success)"></i>Reachable</span><span><i class="sq" style="background:var(--warning)"></i>Stale</span><span><i class="sq" style="background:var(--danger)"></i>Unreachable</span></div></div>'+
+ '<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Uptime</h2>'+B('sample')+'</div>'+lineChart('hu',cfgU)+legend('hu',cfgU.series)+'</div><div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Average response time</h2>'+B('sample')+'</div>'+lineChart('hr',cfgR)+legend('hr',cfgR.series)+'</div></div>'+
+ '<div class="pw-card" style="align-self:start"><div class="pw-card-head"><h2 class="pw-h2">Recent outages</h2>'+B('sample')+'</div>'+(outs.length?'<ul class="pw-events">'+outs.slice(0,6).map(function(e){return '<li><span class="pw-ev-ic bad">'+I('x',16)+'</span><div class="pw-grow"><strong>'+esc(mName(e.m))+'</strong><div class="pw-muted" style="font-size:13px">'+dTime(e.t)+' · '+dur(e.dur||5)+'</div></div></li>'}).join('')+'</ul>':'<p class="pw-muted">No outages in this range.</p>')+'</div></div>'+
+ '<div><h2 class="pw-h2" style="margin-bottom:12px">Event log</h2>'+log+'</div>'}
+/* ---------- reports ---------- */
+function viewReports(){
+ if(S.view==='loading')return head('',true)+skeleton();
+ if(S.view==='error')return head('',true)+errorState();
+ var R=S.rep,days=R.period==='weekly'?'7':'30',ids=S.machines.filter(function(m){return m.hist}).map(function(m){return m.id});
+ if(S.view==='empty'||!ids.length)return head('',true)+empty('mute','chart','Not enough data for reports','Reports need machines with check history.','<button class="pw-btn secondary" data-act="nav" data-to="machines">Go to My PisoWiFi</button>');
+ var win=startDay(Date.now())-(+days-1)*DAY;
+ var rows=S.machines.map(function(m){if(!m.hist)return {m:m,none:true,up:-1,outs:-1,rt:-1};var s=summarize(points(m.id,days)),os=HIST[m.id].outs.filter(function(o){return o.s>=win}),lg=os.reduce(function(a,o){return Math.max(a,(o.e-o.s)/MIN)},0);return {m:m,up:s.up,outs:os.length,rt:s.rt,lg:lg}});
+ var k=R.sort;rows.sort(function(a,b){if(a.none!==b.none)return a.none?1:-1;if(k==='name')return R.dir*a.m.name.localeCompare(b.m.name,undefined,{numeric:true})*-1;return R.dir*(a[k]-b[k])});
+ var th=function(key,label){var on=R.sort===key;return '<th aria-sort="'+(on?(R.dir>0?'ascending':'descending'):'none')+'"><button class="th-btn" data-act="rsort" data-k="'+key+'">'+label+(on?(R.dir>0?' ▲':' ▼'):'')+'</button></th>'};
+ var tbl='<div class="pw-tablewrap" style="box-shadow:none"><table class="pw-table"><thead><tr>'+th('name','Machine')+th('up','Uptime')+th('outs','Outages')+th('rt','Avg response')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr><td style="font-weight:600">'+esc(r.m.name)+'</td>'+(r.none?'<td colspan="3">'+B('nodata')+'</td>':'<td>'+r.up.toFixed(1)+'%</td><td>'+r.outs+'</td><td class="pw-mono">'+Math.round(r.rt)+' ms</td>')+'</tr>'}).join('')+'</tbody></table></div>';
+ var cfgU=chartCfg(ids,days,'up',null,null,'Sample uptime trend'),cfgR=chartCfg(ids,days,'rt',null,null,'Sample response time trend');
+ var groups=[];if(R.period==='weekly'){for(var i=6;i>=0;i--){var a=startDay(Date.now())-i*DAY,v={};ids.forEach(function(id){v[id]=HIST[id].outs.filter(function(o){return o.s>=a&&o.s<a+DAY}).length});groups.push({label:dShort(a).replace(/^\w+ /,''),v:v})}}else{for(var w=3;w>=0;w--){var a2=startDay(Date.now())-(w*7+6)*DAY,b2=a2+7*DAY,v2={};ids.forEach(function(id){v2[id]=HIST[id].outs.filter(function(o){return o.s>=a2&&o.s<b2}).length});groups.push({label:'Wk '+(4-w),v:v2})}}
+ var mx=2;groups.forEach(function(g){ids.forEach(function(id){mx=Math.max(mx,g.v[id])})});mx=Math.ceil(mx/2)*2;
+ var bser=ids.map(function(id){return {id:id,name:mName(id),cls:id==='m1'?'b1':'b2'}});
+ var sumOf=function(d){var up=0,o=0,n=0,lg=0;ids.forEach(function(id){var s=summarize(points(id,d));up+=s.up;o+=HIST[id].outs.filter(function(x){return x.s>=startDay(Date.now())-(+d-1)*DAY}).length;HIST[id].outs.forEach(function(x){if(x.s>=startDay(Date.now())-(+d-1)*DAY)lg=Math.max(lg,(x.e-x.s)/MIN)});n++});var best=ids.slice().sort(function(a,b){return summarize(points(b,d)).up-summarize(points(a,d)).up})[0];return {up:up/n,o:o,lg:lg,best:mName(best)}};
+ var w7=sumOf('7'),m30=sumOf('30');
+ var fut=function(ic,t,d){return '<div class="pw-card flat pw-stack" style="gap:10px;border-style:dashed;border-color:var(--border-strong)"><div class="pw-row pw-between"><span class="pw-stat-ic mute">'+I(ic,19)+'</span>'+B('soon')+'</div><div class="pw-h3">'+t+'</div><div class="pw-kpi pw-muted" aria-label="No value">—</div><div class="pw-small pw-muted">'+d+'</div>'+B('notconn')+'</div>'};
+ return head('<button class="pw-btn secondary" data-act="copysum">'+I('download')+'Copy summary</button>',true)+demoBanner('Sample data.','Reliability charts use invented numbers. Future metrics are placeholders and show no values.')+
+ '<div class="pw-row pw-between pw-wrap">'+seg('rep-period',R.period,[['weekly','Weekly'],['monthly','Monthly']],'Report period')+'<span class="pw-small pw-muted">Showing '+(R.period==='weekly'?'last 7 days':'last 30 days')+'</span></div>'+
+ '<div class="pw-grid pw-g2"><div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Device reliability</h2>'+B('sample')+'</div>'+tbl+'<p class="pw-small pw-muted" style="margin-top:12px">Click a column heading to sort. Machines without checks are listed last.</p></div>'+
+ '<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Outage frequency</h2>'+B('sample')+'</div>'+barChart('rb',{groups:groups,series:bser,max:mx,unit:'outages',alt:'Sample outage frequency'})+legend('rb',bser)+'</div>'+
+ '<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Uptime trend</h2>'+B('sample')+'</div>'+lineChart('ru',cfgU)+legend('ru',cfgU.series)+'</div>'+
+ '<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Response time trend</h2>'+B('sample')+'</div>'+lineChart('rr',cfgR)+legend('rr',cfgR.series)+'</div></div>'+
+ '<div class="pw-grid pw-g2"><div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Weekly summary</h2><dl class="pw-kv" style="margin:0"><dt>Period</dt><dd>Last 7 days (sample)</dd><dt>Average uptime</dt><dd>'+w7.up.toFixed(1)+'%</dd><dt>Outages</dt><dd>'+w7.o+'</dd><dt>Longest outage</dt><dd>'+dur(w7.lg)+'</dd><dt>Most reliable</dt><dd>'+esc(w7.best)+'</dd></dl></div>'+
+ '<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Monthly summary</h2><dl class="pw-kv" style="margin:0"><dt>Period</dt><dd>Last 30 days (sample)</dd><dt>Average uptime</dt><dd>'+m30.up.toFixed(1)+'%</dd><dt>Outages</dt><dd>'+m30.o+'</dd><dt>Longest outage</dt><dd>'+dur(m30.lg)+'</dd><dt>Most reliable</dt><dd>'+esc(m30.best)+'</dd></dl></div></div>'+
+ '<div><h2 class="pw-h2">Future metrics</h2><p class="pw-muted" style="margin:4px 0 16px">These need integrations that do not exist yet. No live or sample values are shown.</p><div class="pw-grid pw-g4" style="gap:16px">'+fut('coins','Sales','Coin and voucher sales')+fut('coins','Revenue','Earnings per machine')+fut('cpu','CPU usage','Per-machine load')+fut('thermo','CPU temperature','Heat monitoring')+fut('ram','RAM usage','Memory pressure')+fut('disk','Storage','Disk space')+fut('users','Connected users','Active clients')+'<div class="pw-card flat pw-stack" style="gap:8px;justify-content:center"><span class="pw-badge mute" style="align-self:flex-start">'+I('info',14)+'Integration Not Available</span><div class="pw-small pw-muted">Needs data from WiFi5Soft, which this project has not integrated.</div></div></div></div>'}
+
+/* ---------- automations ---------- */
+var RULES={outage:['alert','Outage alert','Notify when a machine becomes Unreachable','Trigger: HTTP admin check fails twice · Action: send Telegram message'],recovery:['check','Recovery alert','Notify when a machine is Reachable again','Trigger: first successful check after an outage · Action: send Telegram message'],daily:['mail','Daily report','Send a daily uptime summary at 08:00','Trigger: schedule 08:00 · Action: build summary, send Telegram message'],weekly:['chart','Weekly report','Send a weekly reliability report on Mondays','Trigger: schedule Mondays 08:00 · Action: build report, send Telegram message']};
+var EXEC=[['outage','Outage alert','failed','Telegram chat not linked','2 h ago'],['recovery','Recovery alert','failed','Telegram chat not linked','2 h ago'],['daily','Daily report','skipped','Rule disabled','Today 08:00'],['weekly','Weekly report','skipped','Rule disabled','Mon 08:00'],['outage','Outage alert','failed','n8n webhook not configured','3 days ago']];
+function msgPreview(k){var m=selM()||{name:'PisoWiFi 01'};return {outage:m.name+' is unreachable\nHTTP check timed out after 5 s\nLast successful check: 25 min ago\n(Sample message. Not sent.)',recovery:m.name+' is reachable again\nDowntime: 18 min\n(Sample message. Not sent.)',daily:'Daily report\nUptime 99.4% · 1 outage · avg 46 ms\n(Sample message. Not sent.)',weekly:'Weekly report\nUptime 98.7% · 4 outages · longest 52 min\n(Sample message. Not sent.)'}[k]}
+function viewAuto(){
+ if(S.view==='loading')return head('',true)+skeleton();
+ if(S.view==='error')return head('',true)+errorState();
+ if(S.view==='empty')return head('',true)+empty('mute','zap','No automation rules','Rules will appear here once n8n is connected. This module is Coming Soon.');
+ var A=S.auto,tabs=[['rules','Rules'],['history','Execution history'],['failed','Failed workflows'],['prefs','Notification preferences']];
+ var conn=function(ic,t,d,bt){return '<div class="pw-card pw-stack"><div class="pw-row pw-between pw-wrap"><div class="pw-row"><span class="pw-stat-ic">'+I(ic,19)+'</span><h2 class="pw-h2">'+t+'</h2></div>'+B('notconn')+'</div><p class="pw-muted">'+d+'</p><button class="pw-btn secondary" disabled title="Not available in this prototype">'+bt+' (Coming Soon)</button></div>'};
+ var tab='';
+ if(A.tab==='rules')tab='<div class="pw-grid pw-g-main" style="align-items:start"><div class="pw-card"><div class="pw-card-head" style="margin-bottom:0"><h2 class="pw-h2">Automation rules</h2>'+B('soon')+'</div>'+Object.keys(RULES).map(function(k){var r=RULES[k];return '<div class="rule"><span class="pw-stat-ic '+(A.rules[k]?'':'mute')+'">'+I(r[0],19)+'</span><div class="pw-grow" style="min-width:0"><div class="pw-h3">'+r[1]+'</div><div class="pw-muted" style="font-size:13px">'+r[2]+'</div><button class="rowlink" style="color:var(--brand);font-size:12px;font-weight:600" data-act="rulepv" data-key="'+k+'">Preview message</button></div>'+sw(A.rules[k],'rule',k,r[1]+' (demo, takes effect when connected)')+'</div>'}).join('')+'<p class="pw-small pw-muted" style="margin-top:8px">Switches save only in this demo. Nothing runs until n8n exists.</p></div>'+
+  '<div class="pw-card pw-stack"><div class="pw-card-head" style="margin:0"><h2 class="pw-h2">Message preview</h2>'+B('sample')+'</div><div style="max-width:340px">'+sel('a-rule','Rule',A.rule,Object.keys(RULES).map(function(k){return [k,RULES[k][1]]}),{bind:'arule'})+'</div><div class="tg"><div class="pw-small pw-muted" style="margin-bottom:8px">Telegram · Coming Soon</div><div class="tg-b">'+esc(msgPreview(A.rule))+'</div></div><p class="pw-small pw-muted">'+esc(RULES[A.rule][3])+'</p></div></div>';
+ else if(A.tab==='history'){var l=EXEC.filter(function(e){return A.hf==='all'||e[2]===A.hf});tab='<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Execution history</h2>'+B('demo')+'</div><div style="max-width:240px;margin-bottom:12px">'+sel('a-hf','Result',A.hf,[['all','All results'],['failed','Failed'],['skipped','Skipped']],{bind:'ahf'})+'</div>'+(l.length?'<div class="pw-tablewrap" style="box-shadow:none"><table class="pw-table"><thead><tr><th>Workflow</th><th>Result</th><th>Reason</th><th>When</th></tr></thead><tbody>'+l.map(function(e){return '<tr><td style="font-weight:600">'+e[1]+'</td><td class="nw">'+(e[2]==='failed'?B('failed'):B('paused','Skipped'))+'</td><td class="pw-muted">'+e[3]+'</td><td class="nw">'+e[4]+'</td></tr>'}).join('')+'</tbody></table></div>':empty('mute','inbox','No executions match','Change the result filter.'))+'<p class="pw-small pw-muted" style="margin-top:12px">Sample rows. No workflow has ever run.</p></div>'}
+ else if(A.tab==='failed')tab='<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Failed workflows</h2>'+B('demo')+'</div><ul class="pw-events">'+EXEC.filter(function(e){return e[2]==='failed'}).map(function(e){return '<li><span class="pw-ev-ic bad">'+I('x',16)+'</span><div class="pw-grow"><strong>'+e[1]+'</strong><div class="pw-muted" style="font-size:13px">'+e[3]+' (example failure) · '+e[4]+'</div></div><button class="pw-btn secondary sm" disabled title="Not connected yet">Retry</button></li>'}).join('')+'</ul></div>';
+ else{var n=S.set.notif;tab='<div class="pw-card pw-stack"><div class="pw-card-head" style="margin:0"><h2 class="pw-h2">Notification preferences</h2>'+B('soon')+'</div>'+[['offline','Notify me when a machine goes offline','Used by the outage alert once connected'],['recovery','Notify me on recovery','Used by the recovery alert once connected'],['tg','Telegram channel','Needs a linked Telegram chat'],['email','Email channel','Not part of the first release']].map(function(r){return '<div class="rule"><div class="pw-grow"><div class="pw-h3">'+r[1]+'</div><div class="pw-small pw-muted">'+r[2]+'</div></div>'+sw(n[r[0]],'notif',r[0],r[1])+'</div>'}).join('')+'<div class="rule"><div class="pw-grow"><div class="pw-h3">Quiet hours 22:00–06:00</div><div class="pw-small pw-muted">Hold non-critical alerts overnight</div></div>'+sw(n.quiet,'notif','quiet','Quiet hours')+'</div></div>'}
+ return head('',true)+banner('warn','alert','<strong>Coming Soon · Not Connected Yet · Prototype UI only.</strong> No n8n workflow or Telegram bot exists. Switches change this demo only.')+
+ '<div class="pw-grid pw-g2">'+conn('zap','n8n integration','Planned: n8n runs automations when monitoring events happen. Instance URL and webhook secret are not configured.','Connect n8n')+conn('send','Telegram notifications','Planned: outage and recovery alerts to a Telegram chat. No bot or chat is linked.','Link Telegram')+'</div>'+
+ '<div class="pw-tabs" role="tablist" aria-label="Automation sections">'+tabs.map(function(t){return '<button role="tab" data-act="atab" data-v="'+t[0]+'" aria-selected="'+(A.tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div>'+tab}
+
+/* ---------- settings ---------- */
+function strength(p){var s=0;if(p.length>=12)s++;if(p.length>=16)s++;if(/[a-z]/.test(p)&&/[A-Z]/.test(p))s++;if(/\d/.test(p))s++;if(/[^A-Za-z0-9]/.test(p))s++;return s}
+function viewSettings(){
+ if(S.view==='loading')return head('',true)+skeleton();
+ if(S.view==='error')return head('',true)+errorState();
+ var T=S.set,sec=T.sec,secs=[['profile','user','Profile'],['security','lock','Security'],['sessions','phone','Sessions'],['theme','sun','Theme'],['monitoring','pulse','Monitoring'],['zerotier','network','ZeroTier'],['notifications','bell','Notifications'],['automation','zap','Automation']];
+ var nav='<div class="pw-card" style="padding:8px"><nav class="set-nav" aria-label="Settings sections">'+secs.map(function(s){return '<button data-act="setsec" data-v="'+s[0]+'" aria-current="'+(sec===s[0])+'">'+I(s[1],18)+s[2]+'</button>'}).join('')+'</nav></div>';
+ var c='';
+ var card=function(t,d,body){return '<section class="pw-card pw-stack"><div><h2 class="pw-h2">'+t+'</h2><div class="pw-muted" style="font-size:13px">'+d+'</div></div>'+body+'</section>'};
+ if(sec==='profile'){var p=T.profile;c=card('Profile','Your account details (demo).','<form data-form="profile" class="pw-stack" novalidate><div class="pw-grid pw-g2" style="gap:16px">'+fld('p-name','Display name',p.name,{bind:'profile',k:'name',err:p.err.name})+fld('p-email','Email',p.email,{bind:'profile',k:'email',err:p.err.email,type:'email'})+'</div><div><button class="pw-btn primary" type="submit">Save changes</button></div></form>')}
+ else if(sec==='security'){var w=T.pw,sc=strength(w.nw),cols=['var(--danger)','var(--danger)','var(--warning)','var(--warning)','var(--success)','var(--success)'];
+  c=card('Security','Change your password and manage two-factor authentication.','<form data-form="pw" class="pw-stack" novalidate><div class="pw-grid pw-g3" style="gap:16px">'+fld('w-cur','Current password',w.cur,{bind:'pw',k:'cur',type:'password',err:w.err.cur,ac:'current-password'})+fld('w-nw','New password',w.nw,{bind:'pw',k:'nw',type:'password',err:w.err.nw,help:'At least 12 characters',ac:'new-password'})+fld('w-cf','Confirm password',w.cf,{bind:'pw',k:'cf',type:'password',err:w.err.cf,ac:'new-password'})+'</div>'+(w.nw?'<div><div class="meter" aria-hidden="true"><i style="width:'+(sc/5*100)+'%;background:'+cols[sc]+'"></i></div><div class="pw-small pw-muted" style="margin-top:4px">Strength: '+['Very weak','Weak','Fair','Good','Strong','Strong'][sc]+'</div></div>':'')+'<div><button class="pw-btn primary" type="submit">Update password</button></div></form>')+
+  card('Two-factor authentication','UI only. Not a real authenticator.','<div class="pw-row pw-between pw-wrap"><div><div class="pw-h3">Authenticator app</div><div class="pw-small pw-muted">'+(T.tfaOn?'Enabled. Next sign-in asks for a code.':'Off')+'</div></div><div class="pw-row">'+B(T.tfaOn?'enabled':'soon',T.tfaOn?'Enabled (demo)':'Prototype')+sw(T.tfaOn||T.tfaSetup,'tfa','tfa','Two-factor authentication')+'</div></div>'+(T.tfaSetup&&!T.tfaOn?'<div class="pw-grid pw-g2" style="align-items:center;gap:16px"><div class="pw-row" style="gap:16px"><div class="qr" role="img" aria-label="Sample pattern, not a real QR code"></div><div class="pw-small pw-muted">Sample pattern, not a real QR code.</div></div><div class="pw-stack" style="gap:8px"><div class="pw-field '+(T.tfaErr?'err':'')+'"><label for="tfa-c">Enter the demo code 123456</label><input id="tfa-c" class="pw-input pw-mono" inputmode="numeric" maxlength="6" data-bind="tfacode" value="'+esc(T.tfaCode)+'">'+(T.tfaErr?'<div class="pw-msg-err">'+I('alert',14)+esc(T.tfaErr)+'</div>':'')+'</div><div class="pw-row"><button class="pw-btn primary" data-act="tfaverify">Verify and enable</button><button class="pw-btn secondary" data-act="tfacancel">Cancel</button></div></div></div>':''))}
+ else if(sec==='sessions'){c=card('Sessions','Where you are signed in (sample list).','<div class="cardlist">'+T.sessions.map(function(s){return '<div class="pw-row pw-between pw-wrap pw-card flat" style="gap:12px"><div><strong>'+esc(s.name)+'</strong><div class="pw-small pw-muted">'+esc(s.meta)+'</div></div>'+(s.cur?B('enabled','Current'):'<button class="pw-btn danger-outline sm" data-act="sessout" data-id="'+s.id+'">Sign out</button>')+'</div>'}).join('')+'</div>'+(T.sessions.length>1?'<div><button class="pw-btn secondary" data-act="sessall">Sign out all other sessions</button></div>':'<p class="pw-muted">No other sessions.</p>'))}
+ else if(sec==='theme'){c=card('Theme','Choose how the app looks. Saved in this browser.','<div class="pw-row"><div class="pw-seg" role="group" aria-label="Theme"><button data-act="settheme" data-v="light" aria-pressed="'+(S.theme==='light')+'">'+I('sun',14)+' Light</button><button data-act="settheme" data-v="dark" aria-pressed="'+(S.theme==='dark')+'">'+I('moon',14)+' Dark</button><button data-act="settheme" data-v="system" aria-pressed="'+(S.theme==='system')+'">System</button></div></div>')}
+ else if(sec==='monitoring'){var q=T.mon;c=card('Monitoring preferences','Used by the demo labels. Real monitoring does not exist yet.','<form data-form="mon" class="pw-stack" novalidate><div class="pw-grid pw-g3" style="gap:16px">'+sel('s-int','Check interval',q.interval,[['30','30 seconds'],['60','60 seconds'],['300','5 minutes'],['900','15 minutes']],{bind:'mon',k:'interval'})+fld('s-to','Timeout (seconds)',q.timeout,{bind:'mon',k:'timeout',type:'number',err:q.err.timeout,help:'1 to 30'})+fld('s-thr','Offline threshold (missed checks)',q.thr,{bind:'mon',k:'thr',type:'number',err:q.err.thr,help:'Machine becomes Stale after this many misses (1 to 10)'})+'</div><div><button class="pw-btn primary" type="submit">Save preferences</button></div></form>')}
+ else if(sec==='zerotier')c=card('ZeroTier integration','Placeholder. No connection exists.','<div>'+B('notconn')+'</div><div class="pw-grid pw-g2" style="gap:16px">'+fld('z-n','Network ID','',{dis:true,ph:'Not configured',mono:true})+fld('z-t','API token','',{dis:true,ph:'Never shown here',mono:true,help:'Secrets are never displayed or stored in this prototype.'})+'</div><div><button class="pw-btn secondary" disabled>Connect ZeroTier (Coming Soon)</button></div>');
+ else if(sec==='notifications'){var n=T.notif;c=card('Notification preferences','Channels are not connected yet.','<div>'+['offline|Offline alerts','recovery|Recovery alerts','email|Email channel','tg|Telegram channel'].map(function(x){var a=x.split('|');return '<div class="rule"><div class="pw-grow pw-h3">'+a[1]+(a[0]==='tg'?' '+B('soon'):'')+'</div>'+sw(n[a[0]],'notif',a[0],a[1])+'</div>'}).join('')+'</div>')}
+ else c=card('Automation preferences','n8n and Telegram placeholders.','<div>'+B('soon')+'</div><div class="pw-grid pw-g2" style="gap:16px">'+fld('au-w','n8n webhook URL','',{dis:true,ph:'Not configured',mono:true})+fld('au-b','Telegram bot','',{dis:true,ph:'Not configured',mono:true})+'</div><div><button class="pw-btn secondary" data-act="nav" data-to="auto">Open Automations</button></div>');
+ return head('',false)+'<div class="set-layout">'+nav+'<div class="pw-stack" style="gap:24px;min-width:0">'+c+'</div></div>'}
+/* ---------- render ---------- */
+var VIEWS={dash:viewDash,machines:viewMachines,detail:viewDetail,remote:viewRemote,history:viewHistory,reports:viewReports,auto:viewAuto,settings:viewSettings};
+var AUTHR={login:1,forgot:1,'2fa':1};
+var app=document.getElementById('app');
+function fp(el){if(!el||!el.getAttribute)return null;if(el.id)return '#'+el.id;var a=el.dataset||{};if(!a.act)return null;var s=el.tagName.toLowerCase()+'[data-act="'+a.act+'"]';['key','v','id','to','k','sec'].forEach(function(k){if(a[k]!=null)s+='[data-'+k+'="'+a[k]+'"]'});return s}
+function applyTheme(){var r=document.documentElement;if(S.theme==='system')r.removeAttribute('data-theme');else r.setAttribute('data-theme',S.theme);try{localStorage.setItem('pw-theme',S.theme)}catch(e){}}
+function a11y(){var h=document.querySelectorAll('th:not([scope])');for(var i=0;i<h.length;i++)h[i].setAttribute('scope','col');var t=document.querySelectorAll('.pw-table');for(var j=0;j<t.length;j++){if(!t[j].querySelector('caption')){var c=document.createElement('caption');c.className='sr';c.textContent=t[j].closest('.t-lg')?'Registered machines':'Data table';t[j].insertBefore(c,t[j].firstChild)}}}
+function render(){
+ var ae=document.activeElement,f=(ae&&ae!==document.body)?fp(ae):null,sl=null;if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA')){try{sl=[ae.selectionStart,ae.selectionEnd]}catch(e){}}
+ var fresh=S.modal&&!S.modal._shown,drawerFresh=S.drawer&&!S._dshown;
+ if(!S.auth&&!AUTHR[S.route])S.route='login';if(S.auth&&AUTHR[S.route])S.route='dash';
+ var html;if(!S.auth)html=(S.route==='forgot'?viewForgot():S.route==='2fa'?view2fa():viewLogin());else html=shell(VIEWS[S.route]())+viewModal();
+ var y=window.pageYOffset;app.innerHTML=html;applyTheme();drawCharts();a11y();
+ document.body.style.overflow=(S.modal||S.drawer)?'hidden':'';
+ if(fresh){S.modal._shown=true;var t=document.getElementById('f-name')||document.getElementById('dcancel')||document.getElementById('dfirst')||document.querySelector('.dialog button');t&&t.focus()}
+ else if(drawerFresh){S._dshown=true;var c=document.querySelector('.drawer-wrap .pw-icon-btn');c&&c.focus()}
+ else if(f){var el=document.querySelector(f);if(el){el.focus({preventScroll:true});if(sl&&el.setSelectionRange){try{el.setSelectionRange(sl[0],sl[1])}catch(e){}}}}
+ if(!S.drawer)S._dshown=false;
+}
+function go(to,keepView){stopRemote();S.route=to;if(!keepView)S.view='normal';S.drawer=false;S.menu=false;S.modal=null;S._dshown=false;render();window.scrollTo(0,0);var m=document.getElementById('main');if(m&&S.auth){m.focus({preventScroll:true});m.classList.add('route-in')}}
+function toast(msg,kind){var c=document.getElementById('toasts');var d=document.createElement('div');d.className='pw-toast';d.innerHTML='<span style="color:var(--'+(kind==='bad'?'danger':'success')+')">'+I(kind==='bad'?'alert':'check',20)+'</span><div style="min-width:0;overflow-wrap:anywhere"><strong style="font-size:13px">'+esc(msg)+'</strong></div>';c.appendChild(d);setTimeout(function(){d.remove()},3600)}
+function copyText(t,ok){try{navigator.clipboard.writeText(t).then(function(){toast(ok)},function(){toast('Clipboard is blocked in this view.','bad')})}catch(e){toast('Clipboard is blocked in this view.','bad')}}
+
+/* ---------- remote simulation ---------- */
+var timers=[],sessInt=null;
+function T(fn,ms){timers.push(setTimeout(fn,ms))}
+function stopRemote(){timers.forEach(clearTimeout);timers=[];if(sessInt){clearInterval(sessInt);sessInt=null}}
+function resetRemote(){stopRemote();var R=S.remote;R.phase='idle';R.step=-1;R.fail=-1;R.attempt=1;R.session=false}
+function runAttempt(att){var R=S.remote,m=mById(R.m);if(!m)return;R.phase='prep';R.attempt=att;R.step=0;R.fail=-1;R.session=false;render();var o=remoteOutcome(m),failAt=-1,end='ready';
+ if(o==='unauth'){failAt=1;end='unauth'}else if(o==='unavailable'){failAt=m.status==='unreachable'?3:2;end='unavail'}else if(o==='retry'){if(att===1){failAt=2;end='retry'}}else if(o==='retryfail'){failAt=2;end=att===1?'retry':'unavail'}
+ (function tick(){T(function(){if(failAt>=0&&R.step===failAt){R.fail=failAt;R.phase=end;render();if(end==='retry')T(function(){runAttempt(2)},1800);return}if(R.step>=3){R.step=4;R.phase='ready';render();return}R.step++;render();tick()},750)})()}
+function startSession(){var end=Date.now()+15*60000;S.remote.session=true;render();if(sessInt)clearInterval(sessInt);sessInt=setInterval(function(){var el=document.getElementById('sesstimer');if(!el){clearInterval(sessInt);sessInt=null;return}var s=Math.max(0,Math.round((end-Date.now())/1000));el.textContent='Simulated session · expires in '+Math.floor(s/60)+':'+pad(s%60)},1000)}
+
+/* ---------- actions ---------- */
+function setLabel(v){return {reachable:'Reachable',stale:'Stale',unreachable:'Unreachable',unknown:'Unknown',error:'Monitoring Error'}[v]}
+function demoCheck(list,done){S.busy=true;render();setTimeout(function(){S.busy=false;list.forEach(function(m){if(m.status==='reachable'||m.status==='unreachable'){m.seenAt=Date.now();if(m.status==='reachable')m.okAt=Date.now()}addEvent(m,'check',m.status,'Demo check completed (simulated). No request was sent.')});toast(done);render()},900)}
+var ACT={
+ nav:function(t){go(t.dataset.to)},go:function(t){go(t.dataset.to)},noop:function(){},skip:function(t,e){e.preventDefault();var m=document.getElementById('main');m&&m.focus()},
+ collapse:function(){S.collapsed=!S.collapsed;render()},
+ drawer:function(){S.drawer=!S.drawer;S.menu=false;render();if(!S.drawer){var b=document.querySelector('.burger');b&&b.focus()}},
+ menu:function(){S.menu=!S.menu;render()},
+ theme:function(){S.theme=effTheme()==='dark'?'light':'dark';S.menu=false;render()},
+ settheme:function(t){S.theme=t.dataset.v;render()},
+ refresh:function(){S.view='loading';render();setTimeout(function(){if(S.view==='loading'){S.view='normal';render();toast('Refreshed. Demo data only, nothing live was fetched.')}},800)},
+ view:function(t){S.view=t.dataset.v;render()},
+ logout:function(){stopRemote();S.auth=false;S.route='login';S.menu=false;S.drawer=false;S.modal=null;S.login.err='';S.login.fe={};S.login.pw='demo';S.view='normal';render();toast('Signed out')},
+ showpw:function(){S.login.show=!S.login.show;render()},remember:function(){S.login.remember=S.login.remember===false;render()},
+ resend:function(){toast('Nothing was sent. Prototype only.')},toast:function(t){toast(t.dataset.msg)},
+ add:function(){openForm(null);render()},edit:function(t){openForm(t.dataset.id);render()},
+ del:function(t){S.modal={type:'delete',id:t.dataset.id};render()},
+ close:function(){closeModal()},scrim:function(t,e){if(e.target===t)closeModal()},
+ 'confirm-del':function(){var id=S.modal.id,m=mById(id),nm=m?m.name:'Machine';S.machines=S.machines.filter(function(x){return x.id!==id});if(S.sel===id)S.sel=S.machines[0]?S.machines[0].id:null;if(S.remote.m===id){resetRemote();S.remote.m=S.sel}if(S.hist.m===id)S.hist.m='all';S.modal=null;render();toast(nm+' deleted (demo)')},
+ tagdel:function(t){S.modal.f.tags.splice(+t.dataset.i,1);render()},
+ 'open-detail':function(t){S.sel=t.dataset.id;go('detail')},
+ 'open-remote':function(t){resetRemote();S.remote.m=t.dataset.id;S.sel=t.dataset.id;go('remote')},
+ 'open-hist':function(t){S.hist.m=t.dataset.id;S.hist.page=0;go('history')},
+ 'open-set':function(t){S.set.sec=t.dataset.sec;go('settings')},
+ legend:function(t){S.hide[t.dataset.key]=!S.hide[t.dataset.key];render()},
+ 'dash-range':function(t){S.dash.range=t.dataset.v;render()},
+ 'rep-period':function(t){S.rep.period=t.dataset.v;render()},
+ rsort:function(t){var k=t.dataset.k;if(S.rep.sort===k)S.rep.dir*=-1;else{S.rep.sort=k;S.rep.dir=k==='name'?1:-1}render()},
+ mreset:function(){S.mq='';S.mstatus='all';render()},
+ hreset:function(){S.hist={m:'all',range:'14',from:'',to:'',status:'all',ev:'all',page:0};render()},
+ hpage:function(t){S.hist.page=Math.max(0,S.hist.page+(+t.dataset.v));render()},
+ csv:function(){var win=histWindow(),rows=histEvents(win).map(function(e){return [dTime(e.t),mName(e.m),e.type,e.st,'"'+e.msg.replace(/"/g,'""')+'"'].join(',')});copyText('time,machine,type,status,message\n'+rows.join('\n'),'CSV copied ('+rows.length+' sample rows)')},
+ copysum:function(){var d=S.rep.period==='weekly'?'7':'30',l=['PisoWiFi Monitoring · '+(d==='7'?'weekly':'monthly')+' summary (sample data)'];S.machines.forEach(function(m){if(m.hist){var s=summarize(points(m.id,d));l.push(m.name+': uptime '+s.up.toFixed(1)+'%, avg '+Math.round(s.rt)+' ms')}else l.push(m.name+': not enough checks')});copyText(l.join('\n'),'Summary copied')},
+ check:function(t){var m=mById(t.dataset.id);m&&demoCheck([m],'Demo check done. No request was sent.')},
+ checkall:function(){demoCheck(S.machines,'Demo checks done. No requests were sent.')},
+ montoggle:function(t){var m=mById(t.dataset.id);m.monitor=!m.monitor;addEvent(m,'system','unknown','Monitoring '+(m.monitor?'resumed':'paused')+' (demo)');render();toast('Monitoring '+(m.monitor?'resumed':'paused')+' (demo)')},
+ rsel:function(t){resetRemote();S.remote.m=t.dataset.id;S.sel=t.dataset.id;render()},
+ connect:function(){stopRemote();runAttempt(1)},rcancel:function(){resetRemote();render();toast('Simulation cancelled')},rreset:function(){resetRemote();render()},
+ ropen:function(){startSession()},rend:function(){resetRemote();render();toast('Simulated session ended')},
+ atab:function(t){S.auto.tab=t.dataset.v;render()},
+ rule:function(t){var k=t.dataset.key;S.auto.rules[k]=!S.auto.rules[k];render();toast(RULES[k][1]+(S.auto.rules[k]?' on':' off')+' (demo only)')},
+ rulepv:function(t){S.auto.rule=t.dataset.key;render()},
+ notif:function(t){var k=t.dataset.key;S.set.notif[k]=!S.set.notif[k];render();toast('Saved in the demo only')},
+ setsec:function(t){S.set.sec=t.dataset.v;render()},
+ sessout:function(t){S.set.sessions=S.set.sessions.filter(function(s){return s.id!==t.dataset.id});render();toast('Session signed out (sample)')},
+ sessall:function(){S.set.sessions=S.set.sessions.filter(function(s){return s.cur});render();toast('Other sessions signed out (sample)')},
+ tfa:function(){var T=S.set;if(T.tfaOn){T.tfaOn=false;T.tfaSetup=false;render();toast('Two-factor turned off (demo)')}else{T.tfaSetup=!T.tfaSetup;T.tfaCode='';T.tfaErr='';render()}},
+ tfaverify:function(){var T=S.set;if(T.tfaCode==='123456'){T.tfaOn=true;T.tfaSetup=false;render();toast('Two-factor enabled (demo)')}else{T.tfaErr='That code is not right. Use 123456.';render()}},
+ tfacancel:function(){S.set.tfaSetup=false;render()}
+};
+function closeModal(){var op=S.modal&&S.modal.opener;S.modal=null;render();if(op){var el=document.querySelector(op.charAt(0)==='#'?op:op);el&&el.focus&&el.focus()}}
+document.addEventListener('click',function(e){
+ var t=e.target.closest&&e.target.closest('[data-act]');
+ if(S.menu&&!(e.target.closest&&e.target.closest('.menu-wrap'))){S.menu=false;if(!t){render()}}
+ if(!t||t.disabled)return;var fn=ACT[t.dataset.act];if(fn){if(t.dataset.act==='scrim'&&e.target!==t)return;
+  if(!S.modal||t.dataset.act==='close'||t.dataset.act==='scrim'||t.dataset.act==='confirm-del'||t.dataset.act==='tagdel'||t.closest('.overlay')){}
+  if((t.dataset.act==='add'||t.dataset.act==='edit'||t.dataset.act==='del')&&!S.modal){var o=fp(document.activeElement);var r=fn(t,e);if(S.modal&&o)S.modal.opener=o;return r}
+  fn(t,e)}
+});
+
+/* ---------- form + input wiring ---------- */
+function setErrFree(el){var fl=el.closest('.pw-field');if(fl){fl.classList.remove('err');var m=fl.querySelector('.pw-msg-err');if(m)m.remove();el.removeAttribute('aria-invalid')}}
+var BIND={
+ login:function(el){S.login[el.dataset.k]=el.value;S.login.err='';if(S.login.fe[el.dataset.k]){delete S.login.fe[el.dataset.k];setErrFree(el)}},
+ forgot:function(el){S.forgot.email=el.value;S.forgot.err=''},
+ tfa:function(el){el.value=el.value.replace(/\D/g,'');S.tfa.code=el.value;S.tfa.err='';setErrFree(el)},
+ form:function(el){var f=S.modal.f;f[el.dataset.k]=el.value;if(f.err&&f.err[el.dataset.k]){delete f.err[el.dataset.k];setErrFree(el)}},
+ tagin:function(el){S.modal.f.tagIn=el.value},
+ mq:function(el){S.mq=el.value;if(S.route!=='machines'){S.route='machines';S.view='normal'}render()},
+ mstatus:function(el){S.mstatus=el.value;render()},msort:function(el){S.msort=el.value;render()},
+ view:function(el){S.view=el.value;render()},
+ selm:function(el){S.sel=el.value;render()},
+ simstate:function(el){var m=selM();setStatus(m,el.value);addEvent(m,'system',el.value,'Demo state set to '+setLabel(el.value));render();toast(m.name+' set to '+setLabel(el.value)+' (demo)')},
+ routcome:function(el){S.remote.outcome=el.value;resetRemote();render()},
+ hist:function(el){S.hist[el.dataset.k]=el.value;S.hist.page=0;if(el.dataset.k==='range'&&el.value==='custom'){S.hist.from=iso(Date.now()-13*DAY);S.hist.to=iso(Date.now())}render()},
+ arule:function(el){S.auto.rule=el.value;render()},ahf:function(el){S.auto.hf=el.value;render()},
+ profile:function(el){S.set.profile[el.dataset.k]=el.value;if(S.set.profile.err[el.dataset.k]){delete S.set.profile.err[el.dataset.k];setErrFree(el)}},
+ pw:function(el){S.set.pw[el.dataset.k]=el.value;if(S.set.pw.err[el.dataset.k]){delete S.set.pw.err[el.dataset.k];setErrFree(el)}if(el.dataset.k==='nw')render()},
+ mon:function(el){S.set.mon[el.dataset.k]=el.value;if(S.set.mon.err[el.dataset.k]){delete S.set.mon.err[el.dataset.k];setErrFree(el)}},
+ tfacode:function(el){el.value=el.value.replace(/\D/g,'');S.set.tfaCode=el.value}
+};
+document.addEventListener('input',function(e){var el=e.target;if(!el.dataset||!el.dataset.bind)return;if(el.tagName==='SELECT'||el.type==='date')return;BIND[el.dataset.bind]&&BIND[el.dataset.bind](el)});
+document.addEventListener('change',function(e){var el=e.target;if(!el.dataset||!el.dataset.bind)return;if(!(el.tagName==='SELECT'||el.type==='date'))return;BIND[el.dataset.bind]&&BIND[el.dataset.bind](el)});
+document.addEventListener('keydown',function(e){
+ var el=e.target;
+ if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&el&&el.getAttribute&&el.getAttribute('role')==='tab'){var tabs=[].slice.call(el.parentNode.querySelectorAll('[role=tab]')),i=tabs.indexOf(el),n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];e.preventDefault();n.click();var nn=document.querySelector('[role=tab][data-v="'+n.dataset.v+'"]');nn&&nn.focus();return}
+ if(e.key==='Escape'){if(S.modal){closeModal();return}if(S.drawer){ACT.drawer();return}if(S.menu){S.menu=false;render()}return}
+ if(el&&el.id==='f-tag'&&(e.key==='Enter'||e.key===',')){e.preventDefault();var v=el.value.replace(/,/g,'').trim().toLowerCase();if(v&&S.modal.f.tags.indexOf(v)<0&&S.modal.f.tags.length<8)S.modal.f.tags.push(v);S.modal.f.tagIn='';render();return}
+ if(e.key==='Tab'){var box=document.querySelector('.dialog')||document.querySelector('.drawer-wrap');if(box){var f=[].slice.call(box.querySelectorAll('button:not([disabled]),input:not([disabled]),select,textarea,a[href]')).filter(function(x){return x.offsetParent!==null});if(f.length){var first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}else if(!box.contains(document.activeElement)){e.preventDefault();first.focus()}}}}
+});
+document.addEventListener('submit',function(e){
+ var f=e.target;if(!f.dataset||!f.dataset.form)return;e.preventDefault();var k=f.dataset.form;
+ if(k==='login'){var L=S.login;L.err='';L.fe={};if(!L.email.trim())L.fe.email='Enter your username or email';if(!L.pw)L.fe.pw='Enter your password';if(L.fe.email||L.fe.pw){render();return}
+  L.loading=true;render();setTimeout(function(){L.loading=false;if(L.pw!=='demo'){L.err='Invalid email or password. (Demo: the password is “demo”.)';render();return}if(S.set.tfaOn){S.route='2fa';S.tfa={code:'',err:''};render()}else{S.auth=true;S.route='dash';render();toast('Signed in (demo)')}},900)}
+ else if(k==='forgot'){var F=S.forgot;if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(F.email.trim())){F.err='Enter a valid email address';render();return}F.sent=true;render()}
+ else if(k==='tfa'){var Tf=S.tfa;if(Tf.code==='123456'){S.auth=true;S.route='dash';render();toast('Verified (demo)')}else{Tf.err=Tf.code.length<6?'Enter all 6 digits.':'That code is not right. Use 123456.';render();document.getElementById('otp').focus()}}
+ else if(k==='machine'){var M=S.modal,fm=M.f;var pend=fm.tagIn.replace(/,/g,'').trim().toLowerCase();if(pend&&fm.tags.indexOf(pend)<0)fm.tags.push(pend);fm.tagIn='';var er=validateForm(fm,M.id);if(Object.keys(er).length){fm.err=er;render();var key=Object.keys(er)[0],fe=document.getElementById('f-'+key);fe&&fe.focus();return}
+  var op=M.opener,nm=fm.name.trim(),id;if(M.id){var m=mById(M.id);Object.assign(m,{name:nm,loc:fm.loc.trim(),desc:fm.desc.trim(),sw:fm.sw,ver:fm.ver.trim(),ztNet:fm.ztNet.trim(),ip:fm.ip.trim(),path:fm.path.trim(),tags:fm.tags});id=m.id;S.modal={type:'success',id:id,msg:nm+' saved',opener:op}}
+  else{id='m'+(++S.seq);var nmch=mkM({id:id,name:nm,loc:fm.loc.trim(),desc:fm.desc.trim(),sw:fm.sw,ver:fm.ver.trim(),ztNet:fm.ztNet.trim(),ip:fm.ip.trim(),path:fm.path.trim(),tags:fm.tags,status:'unknown',did:'demo-'+id});S.machines.push(nmch);S.modal={type:'success',id:id,msg:nm+' added',again:true,opener:op}}
+  render();toast(nm+(M.id?' saved':' added')+' (demo)')}
+ else if(k==='profile'){var p=S.set.profile;p.err={};if(!p.name.trim())p.err.name='Display name is required';if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email.trim()))p.err.email='Enter a valid email address';if(Object.keys(p.err).length){render();return}render();toast('Profile saved (demo only)')}
+ else if(k==='pw'){var w=S.set.pw;w.err={};if(!w.cur)w.err.cur='Enter your current password';if(w.nw.length<12)w.err.nw='Use at least 12 characters';else if(w.nw===w.cur)w.err.nw='Choose a different password';if(w.cf!==w.nw)w.err.cf='Passwords do not match';if(Object.keys(w.err).length){render();return}S.set.pw={cur:'',nw:'',cf:'',err:{}};render();toast('Password updated (demo only)')}
+ else if(k==='mon'){var q=S.set.mon;q.err={};var to=+q.timeout,th=+q.thr;if(!(to>=1&&to<=30&&Math.floor(to)===to))q.err.timeout='Enter a whole number from 1 to 30';if(!(th>=1&&th<=10&&Math.floor(th)===th))q.err.thr='Enter a whole number from 1 to 10';if(Object.keys(q.err).length){render();return}render();toast('Monitoring preferences saved (demo)')}
+});
+/* ---------- chart + tooltip pointer ---------- */
+var tipEl=null;
+function showTip(x,y,html){if(!tipEl){tipEl=document.createElement('div');tipEl.id='tip';tipEl.setAttribute('role','tooltip');document.body.appendChild(tipEl)}tipEl.innerHTML=html;tipEl.hidden=false;var r=tipEl.getBoundingClientRect();tipEl.style.left=Math.max(8,Math.min(x+14,innerWidth-r.width-8))+'px';var top=y-r.height-12;if(top<8)top=y+16;tipEl.style.top=top+'px'}
+function hideTip(){if(tipEl)tipEl.hidden=true;var c=document.querySelectorAll('.cur');for(var i=0;i<c.length;i++)c[i].style.opacity=0}
+function hover(e){var tg=e.target;if(!tg||!tg.closest)return;var cw=tg.closest('.cw[data-kind="line"]');
+ if(cw&&cw.querySelector('svg')){var cfg=CH[cw.dataset.chart],svg=cw.querySelector('svg'),w=cw._w,r=svg.getBoundingClientRect(),x=(e.clientX-r.left)*(w/r.width),n=cfg.labels.length,i=Math.round((x-50)/(w-64)*(n-1));i=Math.max(0,Math.min(n-1,i));var cx=50+i*(w-64)/(n-1),cur=svg.querySelector('.cur');if(cur){cur.setAttribute('x1',cx);cur.setAttribute('x2',cx);cur.style.opacity=1}
+  var vis=cfg.series.filter(function(s){return !S.hide[cw.dataset.chart+s.id]});showTip(e.clientX,e.clientY,'<div>'+esc(cfg.labels[i])+'</div>'+vis.map(function(s){return '<div>'+esc(s.name)+': '+s.v[i]+esc(cfg.unit)+'</div>'}).join(''));return}
+ var t=tg.closest('[data-tip]');if(t)showTip(e.clientX,e.clientY,esc(t.getAttribute('data-tip')));else hideTip()}
+document.addEventListener('pointermove',hover);document.addEventListener('pointerdown',hover);
+document.addEventListener('pointerout',function(e){if(!e.relatedTarget)hideTip()});
+var rz;window.addEventListener('resize',function(){clearTimeout(rz);rz=setTimeout(function(){if(S.drawer&&innerWidth>=900){S.drawer=false;render()}else drawCharts()},120)});
+if(window.matchMedia)try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){if(S.theme==='system')render()})}catch(e){}
+var tc=document.createElement('div');tc.id='toasts';tc.setAttribute('aria-live','polite');document.body.appendChild(tc);
+window.__pw={S:S,render:render,go:go};
+render();
+})();
+
+</script>

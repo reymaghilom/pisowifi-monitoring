@@ -1,0 +1,31 @@
+<!-- @dsCard height=300 -->
+<style>
+html,body{height:300px;overflow:hidden}
+.c{position:relative;width:960px;height:300px;background:var(--bg);overflow:hidden}
+.t{position:absolute;left:40px;bottom:36px;width:440px}
+.n{font:700 84px/.95 var(--font-sans);letter-spacing:-.03em;color:var(--ink)}
+.s{margin-top:14px;font:500 13px/20px var(--font-sans);color:var(--ink-muted)}
+svg{position:absolute;left:0;top:0}
+.brand{fill:var(--brand)}.ink{fill:var(--ink)}.ok{fill:var(--success)}.amb{fill:var(--chart-2)}.soft{fill:var(--brand-soft)}
+.arc{fill:none;stroke:var(--on-brand);stroke-width:10;stroke-linecap:round}.dot{fill:var(--on-brand)}
+.b{rx:14px}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<div class="c">
+<svg width="960" height="300" viewBox="0 0 960 300">
+<!-- blocks: brand 272x208 slab, ink 176x128 (bleeds right), success 112x156 (bleeds bottom), chart-2 56x72, brand-soft 272x76 (bleeds bottom). radius-lg on all.
+ arrangement: one tall brand slab with satellites, blocks bleeding off the right and bottom edges.
+ pattern: literal motif — concentric quarter-arcs from the radius scale rising from one corner of the slab: a wifi signal (PisoWiFi) at 48/96/144px.
+ steps: space-6 gaps 16, radius-lg 14; signal radii 48·96·144 = 3·6·9 steps of 16. -->
+<rect class="brand b" x="496" y="-14" width="272" height="222"/>
+<rect class="ink b" x="784" y="-14" width="190" height="142"/>
+<rect class="ok b" x="784" y="144" width="112" height="170"/>
+<rect class="amb b" x="912" y="144" width="62" height="72"/>
+<rect class="soft b" x="496" y="224" width="272" height="90"/>
+<path class="arc" d="M560 192 A48 48 0 0 0 512 144"/>
+<path class="arc" d="M608 192 A96 96 0 0 0 512 96"/>
+<path class="arc" d="M656 192 A144 144 0 0 0 512 48"/>
+<circle class="dot" cx="512" cy="192" r="9"/>
+</svg>
+<div class="t"><div class="n">PisoWiFi<br>Monitor</div><div class="s">Know when your PisoWiFi is down.</div></div>
+</div>

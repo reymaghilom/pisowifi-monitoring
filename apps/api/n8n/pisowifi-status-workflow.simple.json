@@ -1,0 +1,723 @@
+{
+  "name": "PisoWiFi status notifications (simple)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pisowifi-status",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "ipWhitelist": "127.0.0.1,::1,::ffff:127.0.0.1"
+        }
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "5c1e9a02-7b3d-4e58-a6f4-5e0b00c0ffee",
+      "notes": "Header Auth credential 'PisoWiFi Webhook Auth': Name Authorization, Value 'Bearer <N8N_WEBHOOK_SECRET>'. Select it after import."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ String($('Webhook').first().json.headers?.['x-pisowifi-event-id'] ?? '').slice(0, 64) }}",
+            "machine_id": "={{ String($('Webhook').first().json.body?.machine?.id ?? '').slice(0, 64) }}",
+            "event": "={{ String($('Webhook').first().json.body?.event ?? '').slice(0, 64) }}",
+            "detected_at": "={{ String($('Webhook').first().json.body?.detectedAt ?? '').slice(0, 64) }}",
+            "run_token": "={{ $execution.id }}",
+            "at": "={{ $now.toUTC().toISO() }}",
+            "kind": "attempt",
+            "recipient_id": ""
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "machine_id",
+              "displayName": "machine_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "detected_at",
+              "displayName": "detected_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "kind",
+              "displayName": "kind",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recipient_id",
+              "displayName": "recipient_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "run_token",
+              "displayName": "run_token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "at",
+              "displayName": "at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000002",
+      "name": "Register Attempt",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ],
+      "executeOnce": true,
+      "notes": "Written before Load History, so Decide sees every concurrent execution of this event (lowest live id wins)."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_policy"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": []
+        },
+        "returnAll": true
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000003",
+      "name": "Load Policy",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        300
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_log"
+        },
+        "matchType": "anyCondition",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "machine_id",
+              "condition": "eq",
+              "keyValue": "={{ String($('Webhook').first().json.body?.machine?.id ?? '-') }}"
+            },
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ String($('Webhook').first().json.headers?.['x-pisowifi-event-id'] ?? '-') }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000004",
+      "name": "Load History",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        300
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Decide: validate → policy → chronology → concurrency lock → per-recipient state → compose.\n// Output: one item per recipient to email now ({ send: true, ... }), or one reply item ({ send: false, code, body }).\nconst INFLIGHT_MS = 120000; // a 'sending' row without an outcome, younger than this, may still be in flight\nconst LOCK_MS = 30000;      // > the 25 s execution timeout, <= the dispatcher's 30 s minimum retry delay\nconst EXPECTED_MACHINES = 2;\nconst EXPECTED_RECIPIENTS = 3;\nconst UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;\n\nconst hook = $('Webhook').first().json;\nconst h = hook.headers ?? {};\nconst b = hook.body;\nconst reply = (code, body) => [{ json: { send: false, code, body } }];\n\n// 1. The backend contract (packages/shared/src/notifications.ts) plus the dispatcher's event-ID and timestamp headers.\n//    The HMAC signature cannot be checked: the workflow has no access to the secret (N8N_BLOCK_ENV_ACCESS_IN_NODE=true).\nfunction invalidReason() {\n  if (!b || typeof b !== 'object' || Array.isArray(b)) return 'body';\n  const id = String(h['x-pisowifi-event-id'] ?? '');\n  if (!UUID.test(id)) return 'event_id_header';\n  if (String(b.eventId ?? '') !== id) return 'event_id_mismatch';\n  const ts = String(h['x-pisowifi-timestamp'] ?? '');\n  if (!/^[0-9]{10}$/.test(ts) || Math.abs(Date.now() / 1000 - Number(ts)) > 300) return 'timestamp';\n  const pair = b.event === 'machine.unreachable' ? ['Unreachable', 'Reachable'] : b.event === 'machine.reachable' ? ['Reachable', 'Unreachable'] : null;\n  if (!pair) return 'event';\n  if (b.status !== pair[0] || b.previousStatus !== pair[1]) return 'transition';\n  const m = b.machine;\n  if (!m || typeof m !== 'object' || Array.isArray(m)) return 'machine';\n  if (!UUID.test(String(m.id ?? ''))) return 'machine_id';\n  if (typeof m.name !== 'string' || m.name.trim() === '' || m.name.length > 120) return 'machine_name';\n  if (!/^[0-9]{1,3}([.][0-9]{1,3}){3}$/.test(String(m.ip ?? ''))) return 'machine_ip';\n  if (b.timeZone !== 'Asia/Manila' || b.utcOffset !== '+08:00') return 'time_zone';\n  const iso = String(b.detectedAt ?? '');\n  const at = DateTime.fromISO(iso, { zone: 'utc' });\n  if (!/Z$/.test(iso) || !at.isValid) return 'detected_at';\n  const age = Date.now() - at.toMillis();\n  if (age < -300000 || age > 604800000) return 'detected_at_range';\n  const local = at.setZone('Asia/Manila').setLocale('en-US');\n  if (b.detectedDate !== local.toFormat('MMMM d, yyyy') || b.detectedTime !== local.toFormat('h:mm a')) return 'detected_local';\n  const hasStart = b.outageStartedAt !== undefined && b.outageStartedAt !== null;\n  const hasDown = b.downtimeSeconds !== undefined && b.downtimeSeconds !== null;\n  if (hasStart !== hasDown) return 'downtime';\n  if (hasDown) {\n    const s = b.downtimeSeconds;\n    const o = DateTime.fromISO(String(b.outageStartedAt), { zone: 'utc' });\n    if (b.event !== 'machine.reachable' || !Number.isInteger(s) || s < 0 || !o.isValid || Math.abs(Math.floor((at.toMillis() - o.toMillis()) / 1000) - s) > 1) return 'downtime';\n  }\n  const r = b.recipients;\n  if (!Array.isArray(r) || r.length < 1 || r.length > 20) return 'recipients';\n  const seen = new Set();\n  for (const x of r) {\n    if (!x || typeof x !== 'object' || !UUID.test(String(x.id ?? '')) || seen.has(x.id)) return 'recipients';\n    seen.add(x.id);\n    const e = String(x.email ?? '');\n    if (e.length > 254 || !/^[^@\\s,;<>\"'()\\[\\]]+@[^@\\s,;<>\"'()\\[\\]]+[.][^@\\s,;<>\"'()\\[\\]]+$/.test(e)) return 'recipients';\n  }\n  return '';\n}\nconst reason = invalidReason();\nif (reason) return reply(400, { status: 'invalid', reason });\n\n// 2. Policy: exactly 2 approved machine ids and 3 approved user ids (ids only, never addresses).\nconst rows = (name) => $(name).all().map((i) => i.json).filter((r) => r && typeof r === 'object' && Object.keys(r).length > 0);\nconst norm = (v) => String(v ?? '').trim().toLowerCase();\nconst policy = rows('Load Policy');\nconst ids = (kind) => policy.filter((r) => norm(r.kind) === kind).map((r) => norm(r.ref_id)).filter((v) => v !== '');\nconst machines = ids('machine');\nconst people = ids('recipient');\nconst plan = { total: b.recipients.length, approved: 0, notApproved: 0, alreadySent: 0, inFlight: 0 };\nconst notSent = (status, code) => reply(code, { status, sent: 0, failed: 0, alreadySent: plan.alreadySent, inFlight: plan.inFlight, notApproved: plan.notApproved, total: plan.total });\nif (machines.length !== EXPECTED_MACHINES || new Set(machines).size !== EXPECTED_MACHINES || people.length !== EXPECTED_RECIPIENTS || new Set(people).size !== EXPECTED_RECIPIENTS) return notSent('config_error', 503);\nif (!machines.includes(b.machine.id)) return notSent('machine_not_approved', 422);\n\n// 3. Chronology: a newer event of this machine was already emailed → this older one is stale (its outage was reported).\nconst now = Date.now();\nconst log = rows('Load History');\nconst detected = Date.parse(b.detectedAt);\nif (log.some((r) => r.kind === 'sent' && r.machine_id === b.machine.id && r.event_id !== b.eventId && Date.parse(String(r.detected_at)) > detected)) return notSent('superseded', 200);\n\n// 4. Per-recipient state of this event: sent, or possibly in flight (a 'sending' row with no outcome from its run).\nconst ev = log.filter((r) => r.event_id === b.eventId);\nconst sent = new Set(ev.filter((r) => r.kind === 'sent').map((r) => r.recipient_id));\nconst settled = new Set(ev.filter((r) => r.kind === 'sent' || r.kind === 'failed').map((r) => r.run_token + '|' + r.recipient_id));\nconst flying = new Set(ev.filter((r) => r.kind === 'sending' && !settled.has(r.run_token + '|' + r.recipient_id) && now - Date.parse(String(r.at)) < INFLIGHT_MS).map((r) => r.recipient_id));\nconst toSend = [];\nfor (const x of b.recipients) {\n  if (!people.includes(x.id)) { plan.notApproved++; continue; }\n  plan.approved++;\n  if (sent.has(x.id)) plan.alreadySent++;\n  else if (flying.has(x.id)) plan.inFlight++;\n  else toSend.push(x);\n}\nif (plan.approved === 0) return notSent('no_approved_recipients', 422);\n\n// 5. Concurrency: only the live attempt with the lowest id may send (attempt rows are inserted before this read).\nconst mine = Number($('Register Attempt').first().json.id);\nif (!Number.isFinite(mine)) return notSent('config_error', 503);\nif (toSend.length > 0 && ev.some((r) => r.kind === 'attempt' && Number(r.id) < mine && now - Date.parse(String(r.at)) < LOCK_MS)) {\n  plan.inFlight += toSend.length;\n  toSend.length = 0;\n}\nif (toSend.length === 0) return plan.inFlight > 0 ? notSent('in_progress', 503) : notSent('duplicate', 200);\n\n// 6. Email text (plain text). Machine name flattened to one line, at most 80 characters.\nconst name = String(b.machine.name).replace(/[\\u0000-\\u001f\\u007f\\u2028\\u2029]+/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80);\nconst down = b.event === 'machine.unreachable';\nconst fmt = (s) => {\n  if (s < 60) return 'less than 1 minute';\n  const m = Math.floor(s / 60);\n  return [[Math.floor(m / 1440), 'day'], [Math.floor((m % 1440) / 60), 'hour'], [m % 60, 'minute']].filter((p) => p[0] > 0).map((p) => p[0] + ' ' + p[1] + (p[0] === 1 ? '' : 's')).join(' ');\n};\nconst subject = down ? '[PisoWiFi Alert] ' + name + ' is Offline' : '[PisoWiFi Recovery] ' + name + ' is Back Online';\nconst lines = [down ? name + ' is Offline.' : name + ' is Back Online.', '', 'Machine: ' + name, 'Previous Status: ' + (down ? 'Online' : 'Offline'), 'Current Status: ' + (down ? 'Offline' : 'Online'), (down ? 'Detected: ' : 'Recovered: ') + b.detectedDate + ', ' + b.detectedTime + ' (Asia/Manila)'];\nif (!down && Number.isInteger(b.downtimeSeconds)) lines.push('Downtime: ' + fmt(b.downtimeSeconds));\nlines.push('', 'Event ID: ' + b.eventId);\nconst text = lines.join('\\n');\nreturn toSend.map((x) => ({ json: { send: true, recipientId: x.id, email: x.email, subject, text, plan } }));\n"
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000005",
+      "name": "Decide",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "s1",
+              "leftValue": "={{ $json.send === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000006",
+      "name": "Send?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000007",
+      "name": "Each Recipient",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1340,
+        300
+      ],
+      "notes": "One recipient at a time: each send is recorded before the next starts, so a hang or crash leaves at most one recipient ambiguous."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ String($('Webhook').first().json.headers?.['x-pisowifi-event-id'] ?? '').slice(0, 64) }}",
+            "machine_id": "={{ String($('Webhook').first().json.body?.machine?.id ?? '').slice(0, 64) }}",
+            "event": "={{ String($('Webhook').first().json.body?.event ?? '').slice(0, 64) }}",
+            "detected_at": "={{ String($('Webhook').first().json.body?.detectedAt ?? '').slice(0, 64) }}",
+            "run_token": "={{ $execution.id }}",
+            "at": "={{ $now.toUTC().toISO() }}",
+            "kind": "sending",
+            "recipient_id": "={{ $('Each Recipient').first().json.recipientId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "machine_id",
+              "displayName": "machine_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "detected_at",
+              "displayName": "detected_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "kind",
+              "displayName": "kind",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recipient_id",
+              "displayName": "recipient_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "run_token",
+              "displayName": "run_token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "at",
+              "displayName": "at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000008",
+      "name": "Reserve",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1560,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $('Each Recipient').first().json.email }}",
+        "subject": "={{ $('Each Recipient').first().json.subject }}",
+        "emailType": "text",
+        "message": "={{ $('Each Recipient').first().json.text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000009",
+      "name": "Send Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1780,
+        140
+      ],
+      "onError": "continueRegularOutput",
+      "notes": "Credential: Gmail OAuth2 for pisowifimonitoring@gmail.com (scope gmail.send). Not set in this file; select it after import. Node retry stays off: retries come from PisoWiFi."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pisowifi_alert_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ String($('Webhook').first().json.headers?.['x-pisowifi-event-id'] ?? '').slice(0, 64) }}",
+            "machine_id": "={{ String($('Webhook').first().json.body?.machine?.id ?? '').slice(0, 64) }}",
+            "event": "={{ String($('Webhook').first().json.body?.event ?? '').slice(0, 64) }}",
+            "detected_at": "={{ String($('Webhook').first().json.body?.detectedAt ?? '').slice(0, 64) }}",
+            "run_token": "={{ $execution.id }}",
+            "at": "={{ $now.toUTC().toISO() }}",
+            "kind": "={{ $json.error ? 'failed' : 'sent' }}",
+            "recipient_id": "={{ $('Each Recipient').first().json.recipientId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "machine_id",
+              "displayName": "machine_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "detected_at",
+              "displayName": "detected_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "kind",
+              "displayName": "kind",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recipient_id",
+              "displayName": "recipient_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "run_token",
+              "displayName": "run_token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "at",
+              "displayName": "at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000010",
+      "name": "Record",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2000,
+        140
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ (() => { if ($json.send === false) return $json.body; const p = $('Decide').first().json.plan; const o = $input.all().map((i) => i.json); const sent = o.filter((x) => x.kind === 'sent' || (x.kind === undefined && !x.error)).length; const failed = o.length - sent; const pending = failed + p.inFlight; const r = { code: pending > 0 ? 503 : 200, body: { status: pending > 0 ? 'partial' : 'sent', sent, failed, alreadySent: p.alreadySent, inFlight: p.inFlight, notApproved: p.notApproved, total: p.total } }; return r.body; })() }}",
+        "options": {
+          "responseCode": "={{ (() => { if ($json.send === false) return $json.code; const p = $('Decide').first().json.plan; const o = $input.all().map((i) => i.json); const sent = o.filter((x) => x.kind === 'sent' || (x.kind === undefined && !x.error)).length; const failed = o.length - sent; const pending = failed + p.inFlight; const r = { code: pending > 0 ? 503 : 200, body: { status: pending > 0 ? 'partial' : 'sent', sent, failed, alreadySent: p.alreadySent, inFlight: p.inFlight, notApproved: p.notApproved, total: p.total } }; return r.code; })() }}"
+        }
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000011",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1560,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## PisoWiFi status notifications (simple)\nOffline / Back Online Gmail alerts for verified status changes. Same webhook contract and responses as v4.\n\n**Before activating:** select *PisoWiFi Webhook Auth* on **Webhook** and the Gmail OAuth2 credential on **Send Gmail**.\nData tables (all columns *string*):\n- `pisowifi_alert_policy`: `kind` (machine | recipient), `ref_id`, `note` — exactly 2 machine ids, 3 user ids\n- `pisowifi_alert_log`: `event_id`, `machine_id`, `event`, `detected_at`, `kind`, `recipient_id`, `run_token`, `at`\n\nOnly one of v3 / v4 / simple may be active (same webhook path).",
+        "height": 300,
+        "width": 860,
+        "color": 7
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000101",
+      "name": "Note: Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Delivery: at-least-once, never exactly-once\nEach recipient: **Reserve** (sending) → **Send Gmail** → **Record** (sent / failed). Recipients already *sent* are never emailed again.\nAny failure → 503 → PisoWiFi retries the same event; only pending recipients are emailed.\nA *sending* row without an outcome (n8n crashed or timed out mid-send) defers that recipient for 2 min, then it is emailed again: the one case that can duplicate.",
+        "height": 240,
+        "width": 800,
+        "color": 7
+      },
+      "id": "5c1e9a02-7b3d-4e58-a6f4-000000000102",
+      "name": "Note: Delivery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        -200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Register Attempt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register Attempt": {
+      "main": [
+        [
+          {
+            "node": "Load Policy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Policy": {
+      "main": [
+        [
+          {
+            "node": "Load History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load History": {
+      "main": [
+        [
+          {
+            "node": "Decide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide": {
+      "main": [
+        [
+          {
+            "node": "Send?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send?": {
+      "main": [
+        [
+          {
+            "node": "Each Recipient",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Each Recipient": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reserve",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reserve": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail": {
+      "main": [
+        [
+          {
+            "node": "Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record": {
+      "main": [
+        [
+          {
+            "node": "Each Recipient",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Manila",
+    "executionTimeout": 25,
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "saveExecutionProgress": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "pisowifiTemplate": "status-notifications simple: 11 functional nodes; v4 contract and responses; policy table (ids only), attempt-row lock, per-recipient sending/sent/failed log; credentials not set"
+  },
+  "pinData": {}
+}

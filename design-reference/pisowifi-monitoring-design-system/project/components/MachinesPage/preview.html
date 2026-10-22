@@ -1,0 +1,31 @@
+<!-- @dsCard group="Screens" height=1720 width=1360 subtitle="Machine table, filters, add/edit form with validation, delete dialog" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<div id="r"></div>
+<script>
+const P=PisoWiFi,i=P.icon,D=P.data;
+const act=`<div class="pw-actions"><button class="pw-act" aria-label="View details">${i('pulse',18)}</button><button class="pw-act" aria-label="Remote admin">${i('shield',18)}</button><button class="pw-act" aria-label="Edit">${i('edit',18)}</button><button class="pw-act d" aria-label="Delete">${i('trash',18)}</button></div>`;
+const rows=D.machines.map(m=>`<tr><td><div class="pw-h3">${m.name}</div><div class="pw-small pw-muted">${m.loc}</div></td><td>${m.sw}<div class="pw-small pw-muted">${m.ver}</div></td><td class="pw-mono">${m.ip}</td><td class="pw-mono">${m.path}</td><td>${P.badge(m.status)}</td><td>${m.seen}</td><td>${m.ok}</td><td>${act}</td></tr>`).join('');
+const form=(title,state)=>`<div class="pw-card pw-stack"><div class="pw-card-head" style="margin:0"><h2 class="pw-h2">${title}</h2>${P.badge('demo')}</div>
+<div class="pw-grid pw-g2" style="gap:16px">
+${P.field('Machine name *','<input class="pw-input" value="'+(state?'':'PisoWiFi 03')+'" placeholder="e.g. PisoWiFi 03">','',state?'err':'',state?'Machine name is required':'')}
+${P.field('Location','<input class="pw-input" placeholder="e.g. Main store">')}
+${P.field('Software type','<select class="pw-select"><option>WiFi5Soft</option></select>')}
+${P.field('Software version','<input class="pw-input" placeholder="e.g. v3.5.84">','Optional')}
+<div style="grid-column:1/-1">${P.field('ZeroTier network ID','<input class="pw-input pw-mono" placeholder="16-character ID">','Placeholder only — not verified')}</div>
+${P.field('ZeroTier managed IP *','<input class="pw-input pw-mono" value="'+(state?'192.168.194':'192.168.194.140')+'">','',state?'err':'ok',state?'Enter a full IPv4 address, e.g. 192.168.194.82':'Valid format')}
+${P.field('Admin path','<input class="pw-input pw-mono" value="/admin">','Original WiFi5Soft login is still required')}
+</div>
+${P.field('Description','<textarea class="pw-textarea" placeholder="Optional notes"></textarea>')}
+${P.field('Tags','<div class="pw-row pw-wrap" style="gap:6px;min-height:42px;padding:6px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-md)"><span class="pw-chip">demo '+i('x',12)+'</span><span class="pw-chip">primary '+i('x',12)+'</span><span class="pw-muted pw-small">Add tag…</span></div>')}
+<div class="pw-row" style="justify-content:flex-end"><button class="pw-btn secondary">Cancel</button><button class="pw-btn primary">Save machine</button></div></div>`;
+const content=`
+<div class="pw-row pw-wrap"><label class="pw-search" style="min-width:300px">${i('search',18)}<input placeholder="Search by name, IP or tag"></label>
+<span class="pw-chip">${i('filter',14)}Status: All</span><span class="pw-chip">Sort: Name A–Z</span><div class="pw-grow"></div>${P.badge('demo')}</div>
+<div class="pw-tablewrap"><table class="pw-table"><thead><tr><th>Machine</th><th>Software</th><th>ZeroTier IP</th><th>Admin path</th><th>Status</th><th>Last seen</th><th>Last successful check</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+<div class="pw-grid pw-g2" style="align-items:start">${form('Add machine')}${form('Edit machine — validation errors',true)}</div>
+<div class="pw-grid pw-g2" style="align-items:start">
+<div class="pw-scrim" style="padding:48px 24px"><div class="pw-modal" role="alertdialog"><div class="pw-row" style="gap:12px"><span class="pw-ev-ic bad" style="width:44px;height:44px">${i('trash',20)}</span><div><h3 class="pw-h2">Delete PisoWiFi 02?</h3><p class="pw-muted">This removes the machine and its demo history from the prototype. This can't be undone.</p></div></div><div class="pw-row" style="justify-content:flex-end"><button class="pw-btn secondary">Cancel</button><button class="pw-btn danger">Delete machine</button></div></div></div>
+<div class="pw-card pw-stack" style="align-items:flex-start"><span class="pw-label">Form success</span><span class="pw-ev-ic ok" style="width:48px;height:48px">${i('check',24)}</span><h3 class="pw-h2">PisoWiFi 03 added</h3><p class="pw-muted">It was added to the demo list. Monitoring starts once the real backend exists.</p><div class="pw-row"><button class="pw-btn primary">View machine</button><button class="pw-btn secondary">Add another</button></div></div>
+</div>`;
+document.getElementById('r').innerHTML=P.shell('machines','My PisoWiFi','Registered machines',content,'<button class="pw-btn primary">'+i('plus')+'Add machine</button>');
+</script>

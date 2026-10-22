@@ -1,0 +1,73 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# build output
+.next/
+.next-e2e*/
+out/
+build/
+dist/
+apps/api/dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# tests
+coverage/
+test-results/
+playwright-report/
+blob-report/
+/apps/web/e2e/.artifacts/
+/deploy/d2/artifacts/
+/deploy/d2/artifacts-previous/
+/deploy/d3/artifacts/
+/deploy/d3/artifacts-replacement-*/
+/deploy/d4/artifacts/
+/deploy/remote/artifacts/
+/apps/web/.next-ra/
+/apps/web/.next-rbac/
+/deploy/rbac/artifacts/
+/deploy/rbac/snapshot/
+/apps/web/.next-d3/
+
+# env (commit only the example)
+.env*
+!.env.example
+# key material (e.g. the gateway ticket signing key) never belongs in the repository
+*.pem
+*.key
+
+# logs / OS / editors
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Generated Docker images
+*.oci.tar
+
+# Downloaded installation and offline packages
+/deploy/n8n/offline-noble-bundle/
+/deploy/n8n/artifacts/inputs/*.tar.xz
+
+# Generated RBAC deployment archives
+/deploy/rbac11/artifacts/*.tgz
+/deploy/rbac11/snapshot/*.tgz
+
+# Generated n8n release bundles
+/deploy/n8n/artifacts-n1*/
+
+# Files pending security review - exclude from public GitHub
+/deploy/d3/package.mjs
+/deploy/d4/d4-lib.sh
+/deploy/n8n/package.mjs
+/deploy/n8n/tests/test-public-files.sh
+/docs/operations/stage4-d3-preparation.md
+
+# Private operational material pending public-release review
+/deploy/
+/docs/

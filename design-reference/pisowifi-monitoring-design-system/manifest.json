@@ -1,0 +1,153 @@
+{
+  "name": "PisoWiFi Monitoring Design System",
+  "tokensVersion": 2,
+  "brand": "Emerald Teal + Charcoal",
+  "exportedAt": "2026-10-11T12:32:40Z",
+  "source": {
+    "designSystem": "https://claude.ai/artifact/NHncaZC7JexVpQhj1KoU1j",
+    "prototype": "https://claude.ai/artifact/9eYVEGTzEMd9PYnCZZDe4u"
+  },
+  "componentFileCount": 20,
+  "files": [
+    {
+      "path": "START-HERE.md",
+      "bytes": 1503,
+      "sha256": "1cb073252fe5bf84a11265d5aa88e2f21c64ebd178d9c79ce3d398b78d81ffd3"
+    },
+    {
+      "path": "project/README.md",
+      "bytes": 6654,
+      "sha256": "b6d8ad2f5136178069ee5e6a74aaf7646e4966e2bd74a7d1af8cd0949cb8b33b"
+    },
+    {
+      "path": "project/components/AppShell/README.md",
+      "bytes": 500,
+      "sha256": "0415aa6b5349d70f0a0ec82f4d1911b3228e114a3f1cb5303f3f46149cf48612"
+    },
+    {
+      "path": "project/components/Automations/preview.html",
+      "bytes": 4008,
+      "sha256": "a81a9213edf1a34566c1eeadec48880764bf01ffe263169d79400ae50844794b"
+    },
+    {
+      "path": "project/components/Charts/preview.html",
+      "bytes": 1841,
+      "sha256": "8f54510d01413ff24ac58e0f8b2025c0eaab6ca27618acebc021170aea89e080"
+    },
+    {
+      "path": "project/components/Controls/preview.html",
+      "bytes": 3661,
+      "sha256": "a9ae927e421af1a029bdb93a9c43a1d1fdff529c2fbe8e96703b8cbb06b7ead5"
+    },
+    {
+      "path": "project/components/Cover/preview.html",
+      "bytes": 1984,
+      "sha256": "1be96b14a8a7820c233ab191688693aec1626196e91e0a446e38dcd7bffe1fed"
+    },
+    {
+      "path": "project/components/Dashboard/preview.html",
+      "bytes": 3516,
+      "sha256": "9178af76295db5711f26c4f6493838e5946e15f719415a38eece6ee95f28ed0d"
+    },
+    {
+      "path": "project/components/History/preview.html",
+      "bytes": 4483,
+      "sha256": "bfb8ea9eaaf0b8b013c5e9c5d0a6598870a58d9da029ce38617b8517f952444f"
+    },
+    {
+      "path": "project/components/LineChart/README.md",
+      "bytes": 400,
+      "sha256": "5b3be901b3f6c3e38e8ec99f77f3f5a6cc8d32d50348563fddd2fc1552a66d66"
+    },
+    {
+      "path": "project/components/LoginScreens/preview.html",
+      "bytes": 4376,
+      "sha256": "646b1b5e167807c2f02186628a3143bdfd9294f4672c8348ac7028b316df0d2f"
+    },
+    {
+      "path": "project/components/MachineDetail/preview.html",
+      "bytes": 4022,
+      "sha256": "34a805a5305a28ccafc63471909d056fcc81421e6ceab2f67853b7883cb5d157"
+    },
+    {
+      "path": "project/components/MachinesPage/preview.html",
+      "bytes": 4724,
+      "sha256": "d4a045e86cba52c947edb971fc4fd22afcc11c67e7489c2c3673665bd7badf89"
+    },
+    {
+      "path": "project/components/MobileLayouts/preview.html",
+      "bytes": 2913,
+      "sha256": "13df9133f449234a32f710b21cec150384d6d7464e344fbd5393b40f403f61b8"
+    },
+    {
+      "path": "project/components/RemoteAdmin/preview.html",
+      "bytes": 6344,
+      "sha256": "4d12473e99c7c421c549023e77c7e5f0adbb485648ce56ee45becb4d77b054ed"
+    },
+    {
+      "path": "project/components/Reports/preview.html",
+      "bytes": 4250,
+      "sha256": "782560dd3c4e6ab50751cf61dfb63883cf3cee1ae309c9e0cd6d0b8b239ee24e"
+    },
+    {
+      "path": "project/components/Settings/preview.html",
+      "bytes": 4633,
+      "sha256": "792b094718985162ef4f792de4957074678d112f244bf6042f3c7ac3ee93de59"
+    },
+    {
+      "path": "project/components/StatusBadge/README.md",
+      "bytes": 537,
+      "sha256": "18e77e303edbf168eec882287d5919a24b78c49898e7531b064b38b613920428"
+    },
+    {
+      "path": "project/components/StatusBadge/preview.html",
+      "bytes": 1263,
+      "sha256": "7e9a75076f4c14c9e51fa7e70d21080b49df38c3696ee2c5687a7a5447d21246"
+    },
+    {
+      "path": "project/components/UxStates/preview.html",
+      "bytes": 2895,
+      "sha256": "c27627d668f2e1bbbc0257f053e667be7f23578806f935484680211beb481379"
+    },
+    {
+      "path": "project/components/bundle.css",
+      "bytes": 17222,
+      "sha256": "dea100b6b49b440656a94e5024729094a41014f2f474a4aeca200a6b0cd59a90"
+    },
+    {
+      "path": "project/components/bundle.js",
+      "bytes": 14449,
+      "sha256": "fb3aa369feb8a44e9c535059455873991a6fd3d6c86dd202ee78a127a19649ff"
+    },
+    {
+      "path": "project/components/index.d.ts",
+      "bytes": 633,
+      "sha256": "fbd1b0b68fadab3aa2106066c0f910f8f6553662124b5818e9fd9e0415d83fe5"
+    },
+    {
+      "path": "project/design-system.json",
+      "bytes": 523,
+      "sha256": "f46fc0ab1b985e68b503fc242b622e5328b4a98d7298864dbbc954889712bc7f"
+    },
+    {
+      "path": "project/tokens.json",
+      "bytes": 11456,
+      "sha256": "5cdded59c38d2d55118bc7380e242fe965e9af16f5e854710a744a0ee092f0e8"
+    },
+    {
+      "path": "reference/pisowifi-monitoring-prototype.html",
+      "bytes": 153304,
+      "sha256": "1b9982997f2a7898f9acf1300769f79d33ccc6e7d8a2b4e8315953764f259111"
+    },
+    {
+      "path": "styles/fonts.css",
+      "bytes": 334,
+      "sha256": "1db58c6bb581d49fbf1ac95e5d5cceb250b62e1aa7c7c2d3b26354153d4ce4f6"
+    },
+    {
+      "path": "styles/tokens.css",
+      "bytes": 3040,
+      "sha256": "68472b78c464fc15fb79872b344647241b47886259378eef9b5858d34a2059ab"
+    }
+  ]
+}

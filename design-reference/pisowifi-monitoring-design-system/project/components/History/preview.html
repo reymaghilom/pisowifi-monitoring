@@ -1,0 +1,31 @@
+<!-- @dsCard group="Screens" height=1700 width=1360 subtitle="Filters, timeline, uptime, downtime, event log" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<div id="r"></div>
+<script>
+const P=PisoWiFi,i=P.icon,D=P.data;
+const S=(n)=>Array.from({length:n},(_,k)=>(k===22||k===23||k===61?'bad':k===40?'warn':k>75?'mute':'ok'));
+const sel=(l,v)=>`<div class="pw-field" style="min-width:170px"><label class="pw-label">${l}</label><select class="pw-select"><option>${v}</option></select></div>`;
+const log=[['bad','Unreachable','PisoWiFi 01','HTTP check timed out after 5 s','Oct 11, 15:42','—'],['ok','Reachable','PisoWiFi 01','Admin interface answered','Oct 11, 15:51','41 ms'],['warn','Stale','PisoWiFi 02','No successful check for 15 min','Oct 11, 17:58','—'],['bad','Monitoring Error','PisoWiFi 02','Monitor could not complete the run','Oct 10, 09:14','—'],['mute','Unknown','PisoWiFi 02','Machine added, no checks yet','Oct 9, 11:00','—']];
+const content=`
+<div class="pw-banner info">${i('info')}<div><strong>Sample data.</strong> History is generated for the prototype and does not reflect real machine behaviour.</div></div>
+<div class="pw-card"><div class="pw-row pw-wrap" style="align-items:flex-end;gap:16px">${sel('Machine','All machines')}${sel('Date range','Last 14 days')}${sel('Status','Any status')}${sel('Event','All events')}<div class="pw-grow"></div><button class="pw-btn secondary">Reset</button><button class="pw-btn primary">${i('filter')}Apply</button></div></div>
+<div class="pw-grid pw-g4" style="gap:16px">
+${P.kpi('check','ok','Last successful check','1 min ago','PisoWiFi 01 · sample')}
+${P.kpi('clock','','Average response','46 ms','PisoWiFi 01 · sample')}
+${P.kpi('x','bad','Total downtime','1 h 12 min','Across 2 outages · sample')}
+${P.kpi('pulse','','Uptime','99.4%','14 days · sample')}
+</div>
+<div class="pw-grid pw-g-main">
+<div class="pw-stack" style="gap:24px">
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Timeline</h2>${P.badge('sample')}</div>${P.strip(S(96),32)}
+<div class="pw-legend" style="margin-top:10px"><span><i class="sq" style="background:var(--success)"></i>Reachable</span><span><i class="sq" style="background:var(--warning)"></i>Stale</span><span><i class="sq" style="background:var(--danger)"></i>Unreachable</span><span><i class="sq" style="background:var(--border-strong)"></i>No data</span></div></div>
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Uptime chart</h2>${P.badge('sample')}</div>${P.line({w:760,h:230,labels:D.days,min:94,max:100,ticks:3,unit:'%',series:[{v:D.up1,cls:'l1',area:true},{v:D.up2,cls:'l2'}]})}</div></div>
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Recent outages</h2>${P.badge('sample')}</div><ul class="pw-events">
+<li><span class="pw-ev-ic bad">${i('x',16)}</span><div class="pw-grow"><strong>PisoWiFi 01</strong><div class="pw-muted" style="font-size:13px">Oct 11 · 8 min</div></div></li>
+<li><span class="pw-ev-ic bad">${i('x',16)}</span><div class="pw-grow"><strong>PisoWiFi 02</strong><div class="pw-muted" style="font-size:13px">Oct 9 · 52 min</div></div></li>
+<li><span class="pw-ev-ic bad">${i('x',16)}</span><div class="pw-grow"><strong>PisoWiFi 01</strong><div class="pw-muted" style="font-size:13px">Oct 4 · 12 min</div></div></li></ul></div></div>
+<div><div class="pw-row pw-between" style="margin-bottom:12px"><h2 class="pw-h2">Event log</h2><button class="pw-btn secondary sm">${i('download',16)}Export CSV</button></div>
+<div class="pw-tablewrap"><table class="pw-table"><thead><tr><th>Event</th><th>Machine</th><th>Details</th><th>Time</th><th>Response</th></tr></thead><tbody>${log.map(r=>`<tr><td>${P.badge(r[1]==='Reachable'?'reachable':r[1]==='Unreachable'?'unreachable':r[1]==='Stale'?'stale':r[1]==='Unknown'?'unknown':'error')}</td><td style="font-weight:600">${r[2]}</td><td class="pw-muted">${r[3]}</td><td>${r[4]}</td><td class="pw-mono">${r[5]}</td></tr>`).join('')}</tbody></table></div></div>
+<div class="pw-empty"><span class="pw-empty-ic mute">${i('history',26)}</span><h3 class="pw-h2">No history for this filter</h3><p class="pw-muted" style="max-width:380px">Try a wider date range or another machine. (Empty state preview)</p><button class="pw-btn secondary">Reset filters</button></div>`;
+document.getElementById('r').innerHTML=P.shell('history','Monitoring History','Checks, outages and events',content);
+</script>

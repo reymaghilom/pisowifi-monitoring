@@ -1,0 +1,108 @@
+{
+  "name": "PisoWiFi Status Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pisowifi-status",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "webhookId": "pisowifi-status",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "PisoWiFi Webhook Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const crypto = require('crypto');\n\nconst headers = $json.headers;\nconst secret = $env.PISOWIFI_WEBHOOK_SECRET;\nif (!secret) throw new Error('PISOWIFI_WEBHOOK_SECRET is not set on this n8n instance');\n\nconst timestamp = headers['x-pisowifi-timestamp'];\nconst signature = headers['x-pisowifi-signature'];\nif (!timestamp || !signature) throw new Error('Missing X-PisoWiFi-Timestamp / X-PisoWiFi-Signature header');\n\nconst ageSeconds = Math.abs(Math.floor(Date.now() / 1000) - Number(timestamp));\nif (ageSeconds > 300) throw new Error('Timestamp too old (possible replay)');\n\nconst rawBody = Buffer.from($binary.data.data, 'base64').toString('utf8');\nconst expected = 'sha256=' + crypto.createHmac('sha256', secret).update(`${timestamp}.${rawBody}`).digest('hex');\n\nif (expected !== signature) throw new Error('Invalid X-PisoWiFi-Signature');\n\nreturn $input.item;"
+      },
+      "id": "verify-signature",
+      "name": "Verify Signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "value": "={{ $json.headers['x-pisowifi-event-id'] }}"
+      },
+      "id": "remove-duplicates",
+      "name": "Remove Duplicates",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "YOUR_GMAIL_ADDRESS@gmail.com",
+        "subject": "={{ $('Webhook').item.json.body.subject }}",
+        "emailType": "text",
+        "message": "={{ $('Webhook').item.json.body.text }}",
+        "options": {}
+      },
+      "id": "gmail",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [880, 300],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"sent\" } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1100, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Verify Signature", "type": "main", "index": 0 }]]
+    },
+    "Verify Signature": {
+      "main": [[{ "node": "Remove Duplicates", "type": "main", "index": 0 }]]
+    },
+    "Remove Duplicates": {
+      "main": [[{ "node": "Gmail", "type": "main", "index": 0 }]]
+    },
+    "Gmail": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

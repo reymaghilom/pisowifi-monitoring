@@ -1,0 +1,111 @@
+/* PisoWiFi Monitoring - design tokens as CSS custom properties.
+   Generated 1:1 from project/tokens.json (same values the approved prototype uses).
+   Load this BEFORE project/components/bundle.css. Theme: set data-theme="light"|"dark" on <html>, or omit it to follow the OS. */
+:root {
+  --bg: #f5f8f7;
+  --surface: #ffffff;
+  --surface-2: #ebf1ef;
+  --border: #d5e0dd;
+  --border-strong: #6b807c;
+  --ink: #182626;
+  --ink-muted: #4a5d5a;
+  --brand: #0f766e;
+  --brand-hover: #115e59;
+  --on-brand: #ffffff;
+  --hero: #0f766e;
+  --hero-end: #134e4a;
+  --on-hero: #ffffff;
+  --brand-soft: #ddf2ee;
+  --focus: #0d9488;
+  --success: #2a7319;
+  --success-soft: #e7f4df;
+  --warning: #8f5200;
+  --warning-soft: #fff1d6;
+  --danger: #c01f33;
+  --danger-soft: #fde6e9;
+  --neutral: #576864;
+  --neutral-soft: #e7edeb;
+  --chart-1: #0d9488;
+  --chart-2: #a14a00;
+  --chart-grid: #e0e8e6;
+  --shadow-sm: 0 1px 2px rgba(18,38,38,0.06), 0 1px 1px rgba(18,38,38,0.04);
+  --shadow-md: 0 8px 24px rgba(18,38,38,0.10), 0 2px 6px rgba(18,38,38,0.06);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+  --font-sans: "Inter", "Inter var", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111c1b;
+    --surface: #1c2b29;
+    --surface-2: #243633;
+    --border: #2f4542;
+    --border-strong: #6e8a85;
+    --ink: #e8f1ef;
+    --ink-muted: #a6b8b4;
+    --brand: #2dd4bf;
+    --brand-hover: #5eead4;
+    --on-brand: #0a1a18;
+    --hero: #115e59;
+    --hero-end: #0b2a27;
+    --on-hero: #ffffff;
+    --brand-soft: #14403b;
+    --focus: #5eead4;
+    --success: #8bdb6a;
+    --success-soft: #1f3519;
+    --warning: #f6bb48;
+    --warning-soft: #392a0b;
+    --danger: #ff808b;
+    --danger-soft: #3a1720;
+    --neutral: #9fb1ad;
+    --neutral-soft: #263634;
+    --chart-1: #2dd4bf;
+    --chart-2: #ffa94d;
+    --chart-grid: #283a37;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+    --shadow-md: 0 10px 30px rgba(0,0,0,0.55);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111c1b;
+  --surface: #1c2b29;
+  --surface-2: #243633;
+  --border: #2f4542;
+  --border-strong: #6e8a85;
+  --ink: #e8f1ef;
+  --ink-muted: #a6b8b4;
+  --brand: #2dd4bf;
+  --brand-hover: #5eead4;
+  --on-brand: #0a1a18;
+  --hero: #115e59;
+  --hero-end: #0b2a27;
+  --on-hero: #ffffff;
+  --brand-soft: #14403b;
+  --focus: #5eead4;
+  --success: #8bdb6a;
+  --success-soft: #1f3519;
+  --warning: #f6bb48;
+  --warning-soft: #392a0b;
+  --danger: #ff808b;
+  --danger-soft: #3a1720;
+  --neutral: #9fb1ad;
+  --neutral-soft: #263634;
+  --chart-1: #2dd4bf;
+  --chart-2: #ffa94d;
+  --chart-grid: #283a37;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.55);
+  color-scheme: dark;
+}

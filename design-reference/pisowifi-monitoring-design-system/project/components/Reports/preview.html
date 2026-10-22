@@ -1,0 +1,25 @@
+<!-- @dsCard group="Screens" height=1690 width=1360 subtitle="Reliability reports plus Coming Soon placeholders" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<div id="r"></div>
+<script>
+const P=PisoWiFi,i=P.icon,D=P.data;
+const fut=(ic,t,d)=>`<div class="pw-card flat pw-stack" style="gap:10px;border-style:dashed;border-color:var(--border-strong)"><div class="pw-row pw-between"><span class="pw-stat-ic mute">${i(ic,19)}</span>${P.badge('soon')}</div><div class="pw-h3">${t}</div><div class="pw-kpi pw-muted" aria-label="No value">—</div><div class="pw-small pw-muted">${d}</div>${P.badge('notconn')}</div>`;
+const content=`
+<div class="pw-banner info">${i('info')}<div><strong>Sample data.</strong> Reliability charts use invented numbers. Future metrics below are placeholders and show no values.</div></div>
+<div class="pw-row pw-between pw-wrap"><div class="pw-seg"><button aria-pressed="false">Weekly</button><button aria-pressed="true">Monthly</button></div><button class="pw-btn secondary">${i('download')}Export report</button></div>
+<div class="pw-grid pw-g2">
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Device reliability</h2>${P.badge('sample')}</div>
+<div class="pw-tablewrap" style="box-shadow:none"><table class="pw-table"><thead><tr><th>Machine</th><th>Uptime</th><th>Outages</th><th>Avg response</th></tr></thead><tbody>
+<tr><td style="font-weight:600">PisoWiFi 01</td><td>99.4%</td><td>2</td><td class="pw-mono">46 ms</td></tr><tr><td style="font-weight:600">PisoWiFi 02</td><td>97.9%</td><td>6</td><td class="pw-mono">103 ms</td></tr></tbody></table></div>
+<p class="pw-small pw-muted" style="margin-top:12px">PisoWiFi 02 has too few checks yet for a confident ranking.</p></div>
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Outage frequency</h2>${P.badge('sample')}</div>${P.bars({groups:[{label:'W1',a:2,b:5},{label:'W2',a:1,b:4},{label:'W3',a:3,b:6},{label:'W4',a:0,b:3}],max:8})}
+<div class="pw-legend" style="margin-top:8px"><span><i class="sq" style="background:var(--chart-1)"></i>PisoWiFi 01</span><span><i class="sq" style="background:var(--chart-2)"></i>PisoWiFi 02</span></div></div>
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Uptime trend</h2>${P.badge('sample')}</div>${P.line({w:620,h:230,labels:D.days,min:94,max:100,ticks:3,unit:'%',series:[{v:D.up1,cls:'l1',area:true},{v:D.up2,cls:'l2'}]})}</div>
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Response time trend</h2>${P.badge('sample')}</div>${P.line({w:620,h:230,labels:D.days,min:20,max:160,ticks:4,unit:' ms',series:[{v:D.rt1,cls:'l1'},{v:D.rt2,cls:'l2'}]})}</div>
+</div>
+<div class="pw-grid pw-g2"><div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Weekly summary</h2><dl class="pw-kv" style="margin:0"><dt>Period</dt><dd>Oct 5 – Oct 11 (sample)</dd><dt>Average uptime</dt><dd>98.7%</dd><dt>Outages</dt><dd>4</dd><dt>Longest outage</dt><dd>52 min</dd></dl></div>
+<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Monthly summary</h2><dl class="pw-kv" style="margin:0"><dt>Period</dt><dd>September (sample)</dd><dt>Average uptime</dt><dd>98.9%</dd><dt>Outages</dt><dd>11</dd><dt>Most reliable</dt><dd>PisoWiFi 01</dd></dl></div></div>
+<div><h2 class="pw-h2">Future metrics</h2><p class="pw-muted" style="margin:4px 0 16px">These need integrations that do not exist yet. No live or sample values are shown.</p>
+<div class="pw-grid pw-g4" style="gap:16px">${fut('coins','Sales','Coin and voucher sales')}${fut('coins','Revenue','Earnings per machine')}${fut('cpu','CPU usage','Per-machine load')}${fut('thermo','CPU temperature','Heat monitoring')}${fut('ram','RAM usage','Memory pressure')}${fut('disk','Storage','Disk space')}${fut('users','Connected users','Active clients')}<div class="pw-card flat pw-stack" style="gap:8px;justify-content:center"><span class="pw-badge mute">Integration Not Available</span><div class="pw-small pw-muted">Requires data from WiFi5Soft, which this project has not integrated.</div></div></div></div>`;
+document.getElementById('r').innerHTML=P.shell('reports','Reports & Analytics','Reliability trends and summaries',content);
+</script>

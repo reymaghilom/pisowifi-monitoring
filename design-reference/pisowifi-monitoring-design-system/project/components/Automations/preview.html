@@ -1,0 +1,22 @@
+<!-- @dsCard group="Screens" height=1410 width=1360 subtitle="n8n and Telegram — Coming Soon, prototype UI only" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<div id="r"></div>
+<script>
+const P=PisoWiFi,i=P.icon;
+const rule=(t,d,on,tag)=>`<div class="pw-row" style="padding:14px 0;border-top:1px solid var(--border);gap:14px"><span class="pw-stat-ic ${on?'':'mute'}">${i(tag,19)}</span><div class="pw-grow"><div class="pw-h3">${t}</div><div class="pw-muted" style="font-size:13px">${d}</div></div>${P.badge('soon')}<button class="pw-toggle ${on?'on':''}" aria-label="${t}"></button></div>`;
+const content=`
+<div class="pw-banner warn">${i('alert')}<div><strong>Coming Soon · Not Connected Yet · Prototype UI only.</strong> No n8n workflow or Telegram bot exists. Switches below change nothing.</div></div>
+<div class="pw-grid pw-g2">
+<div class="pw-card pw-stack"><div class="pw-row pw-between"><div class="pw-row"><span class="pw-stat-ic">${i('zap',19)}</span><h2 class="pw-h2">n8n integration</h2></div>${P.badge('notconn')}</div><p class="pw-muted">Planned: n8n will run automations when monitoring events happen.</p><dl class="pw-kv" style="margin:0"><dt>Instance URL</dt><dd class="pw-mono pw-muted">Not configured</dd><dt>Webhook secret</dt><dd class="pw-muted">Not set</dd></dl><button class="pw-btn secondary" disabled>Connect n8n</button></div>
+<div class="pw-card pw-stack"><div class="pw-row pw-between"><div class="pw-row"><span class="pw-stat-ic">${i('send',19)}</span><h2 class="pw-h2">Telegram</h2></div>${P.badge('notconn')}</div><p class="pw-muted">Planned: outage and recovery alerts to a Telegram chat.</p><dl class="pw-kv" style="margin:0"><dt>Bot</dt><dd class="pw-muted">Not configured</dd><dt>Chat</dt><dd class="pw-muted">Not linked</dd></dl><button class="pw-btn secondary" disabled>Link Telegram</button></div></div>
+<div class="pw-card"><div class="pw-card-head" style="margin-bottom:0"><h2 class="pw-h2">Automation rules</h2>${P.badge('demo')}</div>
+${rule('Outage alert','Notify when a machine becomes Unreachable',true,'alert')}${rule('Recovery alert','Notify when a machine is Reachable again',true,'check')}${rule('Daily report','Send a daily uptime summary at 08:00',false,'mail')}${rule('Weekly report','Send a weekly reliability report on Mondays',false,'chart')}</div>
+<div class="pw-grid pw-g2">
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Execution history</h2>${P.badge('demo')}</div>
+<div class="pw-tablewrap" style="box-shadow:none"><table class="pw-table"><thead><tr><th>Workflow</th><th>Result</th><th>When</th></tr></thead><tbody><tr><td>Outage alert</td><td>${P.badge('enabled','Succeeded')}</td><td>2 h ago</td></tr><tr><td>Recovery alert</td><td>${P.badge('enabled','Succeeded')}</td><td>2 h ago</td></tr><tr><td>Daily report</td><td>${P.badge('paused')}</td><td>—</td></tr></tbody></table></div></div>
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Failed workflows</h2>${P.badge('demo')}</div><ul class="pw-events"><li><span class="pw-ev-ic bad">${i('x',16)}</span><div class="pw-grow"><strong>Weekly report</strong><div class="pw-muted" style="font-size:13px">Telegram chat not linked (example failure)</div></div><button class="pw-btn secondary sm">Retry</button></li></ul></div></div>
+<div class="pw-card pw-stack"><h2 class="pw-h2">Notification preferences</h2>
+<div class="pw-row pw-between"><div><div class="pw-h3">Notify me when a machine goes offline</div><div class="pw-small pw-muted">Applies once alerts are connected</div></div><button class="pw-toggle on" aria-label="offline"></button></div>
+<div class="pw-row pw-between"><div><div class="pw-h3">Quiet hours</div><div class="pw-small pw-muted">22:00–06:00</div></div><button class="pw-toggle" aria-label="quiet"></button></div></div>`;
+document.getElementById('r').innerHTML=P.shell('auto','Automations / Integrations','Future n8n and Telegram automation',content);
+</script>

@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    name: Lint, type-check, unit tests, build (web + api)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: pisowifi
+          POSTGRES_PASSWORD: pisowifi
+          POSTGRES_DB: pisowifi_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pisowifi -d pisowifi_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      # Enables the API's readiness test against a real database.
+      TEST_DATABASE_URL: postgresql://pisowifi:pisowifi@localhost:5432/pisowifi_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run db:check -w apps/api
+      # Unit tests; API migration tests also run against the Postgres service via TEST_DATABASE_URL.
+      - run: npm run test
+      - run: npm run build
+
+  e2e:
+    name: End-to-end flows
+    runs-on: ubuntu-latest
+    needs: checks
+    env:
+      PW_CHANNEL: chromium
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/web/e2e/.artifacts/
+          retention-days: 7
+# The visual comparison (npm run test:visual) is run locally: pixel diffs depend on the OS's font rendering.

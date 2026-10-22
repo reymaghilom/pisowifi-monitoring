@@ -1,0 +1,45 @@
+<!-- @dsCard group="Components" height=900 subtitle="Buttons, fields, validation, toggles, tabs" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<div id="r" style="padding:24px"></div>
+<script>
+const P=PisoWiFi,i=P.icon;
+document.getElementById('r').innerHTML=`
+<div class="pw-stack" style="gap:28px">
+<section class="pw-stack" style="gap:12px"><span class="pw-label">Buttons</span>
+<div class="pw-row pw-wrap">
+<button class="pw-btn primary">${i('plus')}Add machine</button>
+<button class="pw-btn secondary">${i('refresh')}Refresh</button>
+<button class="pw-btn ghost">View details</button>
+<button class="pw-btn danger">${i('trash')}Delete</button>
+<button class="pw-btn danger-outline">Remove</button>
+<button class="pw-btn primary loading"><span class="pw-spin"></span>Signing in…</button>
+<button class="pw-btn primary" disabled>Disabled</button>
+<button class="pw-btn secondary sm">Small</button>
+</div></section>
+<section class="pw-stack" style="gap:12px"><span class="pw-label">Fields · default, focus-ready, error, success, help</span>
+<div class="pw-grid pw-g3" style="gap:16px">
+${P.field('Machine name','<input class="pw-input" value="PisoWiFi 01">','Shown in lists and alerts.')}
+${P.field('ZeroTier managed IP','<input class="pw-input pw-mono" value="192.168.194">','','err','Enter a full IPv4 address, e.g. 192.168.194.82')}
+${P.field('Admin path','<input class="pw-input pw-mono" value="/admin">','','ok','Looks good')}
+${P.field('Software type','<select class="pw-select"><option>WiFi5Soft</option></select>')}
+${P.field('Password','<div class="pw-input-wrap"><input class="pw-input" type="password" value="password123"><button aria-label="Show password">'+i('eye')+'</button></div>')}
+${P.field('Description','<textarea class="pw-textarea" placeholder="Optional notes"></textarea>')}
+</div></section>
+<section class="pw-grid pw-g3" style="gap:24px">
+<div class="pw-stack" style="gap:12px"><span class="pw-label">Selection</span>
+<label class="pw-check"><span class="pw-box on">${i('check',14)}</span>Remember me</label>
+<label class="pw-check"><span class="pw-box"></span>Send recovery alerts</label>
+<div class="pw-row"><button class="pw-toggle on" aria-label="on"></button>Outage alerts</div>
+<div class="pw-row"><button class="pw-toggle" aria-label="off"></button>Daily report</div></div>
+<div class="pw-stack" style="gap:12px"><span class="pw-label">Segmented · chips</span>
+<div class="pw-seg"><button aria-pressed="false">24 h</button><button aria-pressed="true">7 days</button><button aria-pressed="false">30 days</button></div>
+<div class="pw-row pw-wrap"><span class="pw-chip">${i('wifi',14)}Status: All</span><span class="pw-chip">demo</span><span class="pw-chip">primary</span></div></div>
+<div class="pw-stack" style="gap:12px"><span class="pw-label">Tabs</span>
+<div class="pw-tabs" role="tablist"><button role="tab" aria-selected="true">Overview</button><button role="tab" aria-selected="false">Events</button><button role="tab" aria-selected="false">Settings</button></div></div>
+</section>
+<section class="pw-stack" style="gap:12px"><span class="pw-label">Banners · toast</span>
+<div class="pw-banner info">${i('info')}<div><strong>Prototype only.</strong> Everything on this screen is demo data and is not connected to real machines.</div></div>
+<div class="pw-banner warn">${i('alert')}<div><strong>Stale.</strong> Last successful check was 3 hours ago.</div></div>
+<div class="pw-toast">${i('check',20)}<div><strong>Settings saved</strong><div class="pw-small pw-muted">Demo only — nothing was stored.</div></div></div></section>
+</div>`;
+</script>

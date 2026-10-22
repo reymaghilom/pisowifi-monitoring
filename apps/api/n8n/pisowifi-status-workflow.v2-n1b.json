@@ -1,0 +1,287 @@
+{
+  "name": "PisoWiFi status notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pisowifi-status",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "ipWhitelist": "127.0.0.1,::1,::ffff:127.0.0.1"
+        }
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 300],
+      "webhookId": "6d0f5a8e-2b7c-4f1e-9a3d-5c8e1f2a7b90",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_HEADER_AUTH_CREDENTIAL_ID",
+          "name": "PisoWiFi Webhook Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ String($json.headers['x-pisowifi-event-id'] ?? '') }}",
+              "rightValue": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "operator": { "type": "string", "operation": "regex" }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ String($json.body?.eventId ?? '') === String($json.headers['x-pisowifi-event-id'] ?? '-') }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            },
+            {
+              "id": "c3",
+              "leftValue": "={{ String($json.body?.event ?? '') + '|' + String($json.body?.status ?? '') + '|' + String($json.body?.previousStatus ?? '') }}",
+              "rightValue": "^(machine\\.unreachable\\|Unreachable\\|Reachable|machine\\.reachable\\|Reachable\\|Unreachable)$",
+              "operator": { "type": "string", "operation": "regex" }
+            },
+            {
+              "id": "c4",
+              "leftValue": "={{ String($json.body?.machine?.name ?? '').trim() }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+            },
+            {
+              "id": "c5",
+              "leftValue": "={{ String($json.body?.detectedDate ?? '') + ' ' + String($json.body?.detectedTime ?? '') }}",
+              "rightValue": "^[A-Z][a-z]+ \\d{1,2}, \\d{4} \\d{1,2}:\\d{2} (AM|PM)$",
+              "operator": { "type": "string", "operation": "regex" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-000000000002",
+      "name": "Valid Event?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": { "__rl": true, "mode": "name", "value": "pisowifi_notifications_sent" },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook').item.json.headers['x-pisowifi-event-id'] }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-000000000003",
+      "name": "Find Sent Record",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [440, 200],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            {
+              "id": "d1",
+              "leftValue": "={{ $json.event_id ?? '' }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-000000000004",
+      "name": "Already Sent?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [660, 200]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "REPLACE_WITH_RECIPIENT@gmail.com",
+        "subject": "={{ (() => { const b = $('Webhook').item.json.body; const n = String(b.machine.name).replace(/[\\r\\n\\t]+/g, ' ').trim(); return b.event === 'machine.unreachable' ? 'PisoWiFi alert: ' + n + ' is Unreachable' : 'PisoWiFi: ' + n + ' is Reachable again'; })() }}",
+        "emailType": "text",
+        "message": "={{ (() => { const b = $('Webhook').item.json.body; const n = String(b.machine.name).replace(/[\\r\\n\\t]+/g, ' ').trim(); const down = b.event === 'machine.unreachable'; return [down ? n + ' is Unreachable.' : n + ' is Reachable again.', '', 'Machine: ' + n, 'IP: ' + String(b.machine.ip ?? ''), 'Status: ' + b.status + ' (was ' + b.previousStatus + ')', 'Detected: ' + b.detectedDate + ', ' + b.detectedTime + ' (Asia/Manila, UTC+8)', '', 'Event ID: ' + b.eventId].join('\\n'); })() }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-000000000005",
+      "name": "Send Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [880, 300],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_GMAIL_CREDENTIAL_ID",
+          "name": "PisoWiFi Gmail (send only)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": { "__rl": true, "mode": "name", "value": "pisowifi_notifications_sent" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ $('Webhook').item.json.headers['x-pisowifi-event-id'] }}",
+            "event": "={{ $('Webhook').item.json.body.event }}",
+            "machine_name": "={{ String($('Webhook').item.json.body.machine.name).slice(0, 120) }}",
+            "status": "={{ $('Webhook').item.json.body.status }}",
+            "detected_at": "={{ $('Webhook').item.json.body.detectedAt }}",
+            "sent_at": "={{ $now.toUTC().toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "event_id", "displayName": "event_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "event", "displayName": "event", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "machine_name", "displayName": "machine_name", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "status", "displayName": "status", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "detected_at", "displayName": "detected_at", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "sent_at", "displayName": "sent_at", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-000000000006",
+      "name": "Record Sent",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [1100, 200],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"sent\" } }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-000000000007",
+      "name": "Respond Sent",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1320, 100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"sent_unrecorded\" } }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-000000000008",
+      "name": "Respond Sent (Record Failed)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1320, 260]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"duplicate\" } }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-000000000009",
+      "name": "Respond Duplicate",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [880, 60]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"gmail_failed\" } }}",
+        "options": { "responseCode": 503 }
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-00000000000a",
+      "name": "Respond Gmail Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1100, 420]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"invalid\" } }}",
+        "options": { "responseCode": 400 }
+      },
+      "id": "0b7f3c1e-4a51-4c2e-9d10-00000000000b",
+      "name": "Respond Invalid",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [440, 440]
+    }
+  ],
+  "connections": {
+    "Webhook": { "main": [[{ "node": "Valid Event?", "type": "main", "index": 0 }]] },
+    "Valid Event?": {
+      "main": [
+        [{ "node": "Find Sent Record", "type": "main", "index": 0 }],
+        [{ "node": "Respond Invalid", "type": "main", "index": 0 }]
+      ]
+    },
+    "Find Sent Record": { "main": [[{ "node": "Already Sent?", "type": "main", "index": 0 }]] },
+    "Already Sent?": {
+      "main": [
+        [{ "node": "Respond Duplicate", "type": "main", "index": 0 }],
+        [{ "node": "Send Gmail", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send Gmail": {
+      "main": [
+        [{ "node": "Record Sent", "type": "main", "index": 0 }],
+        [{ "node": "Respond Gmail Failed", "type": "main", "index": 0 }]
+      ]
+    },
+    "Record Sent": {
+      "main": [
+        [{ "node": "Respond Sent", "type": "main", "index": 0 }],
+        [{ "node": "Respond Sent (Record Failed)", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Manila",
+    "executionTimeout": 25,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "pisowifiTemplate": "status-notifications v2 (N1-B): dedupe recorded only after a successful send; contract-field wording"
+  },
+  "pinData": {}
+}

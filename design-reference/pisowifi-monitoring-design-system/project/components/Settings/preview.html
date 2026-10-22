@@ -1,0 +1,24 @@
+<!-- @dsCard group="Screens" height=2180 width=1360 subtitle="Profile, security, sessions, monitoring, placeholders" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<div id="r"></div>
+<script>
+const P=PisoWiFi,i=P.icon;
+const sec=(id,t,d,body)=>`<section class="pw-card pw-stack" id="${id}"><div><h2 class="pw-h2">${t}</h2><div class="pw-muted" style="font-size:13px">${d}</div></div>${body}</section>`;
+const side=['Profile','Security','Sessions','Theme','Monitoring','ZeroTier','Notifications','Automation'];
+const content=`
+<div class="pw-grid" style="grid-template-columns:220px minmax(0,1fr);align-items:start">
+<div class="pw-card" style="padding:8px;position:sticky;top:88px"><nav class="pw-nav">${side.map((s,n)=>`<a href="#" ${n===0?'aria-current="page"':''}>${s}</a>`).join('')}</nav></div>
+<div class="pw-stack" style="gap:24px">
+<div class="pw-toast">${i('check',20)}<div><strong>Settings saved</strong><div class="pw-small pw-muted">Demo only — nothing was stored.</div></div></div>
+${sec('profile','Profile','Your account details (demo).',`<div class="pw-grid pw-g2" style="gap:16px">${P.field('Display name','<input class="pw-input" value="Operator">')}${P.field('Email','<input class="pw-input" value="operator@example.com">')}</div><div><button class="pw-btn primary">Save changes</button></div>`)}
+${sec('security','Security','Password and two-factor authentication.',`<div class="pw-grid pw-g3" style="gap:16px">${P.field('Current password','<input class="pw-input" type="password" value="••••••••">')}${P.field('New password','<input class="pw-input" type="password">','At least 12 characters')}${P.field('Confirm password','<input class="pw-input" type="password">')}</div>
+<div class="pw-row pw-between" style="border-top:1px solid var(--border);padding-top:16px"><div><div class="pw-h3">Two-factor authentication</div><div class="pw-small pw-muted">UI only — not enabled in this prototype</div></div><div class="pw-row">${P.badge('soon')}<button class="pw-toggle" aria-label="2FA"></button></div></div>`)}
+${sec('sessions','Sessions','Where you are signed in (sample list).',`<div class="pw-tablewrap" style="box-shadow:none"><table class="pw-table"><tbody><tr><td><strong>This browser</strong><div class="pw-small pw-muted">Sample · just now</div></td><td>${P.badge('enabled','Current')}</td><td></td></tr><tr><td><strong>Phone</strong><div class="pw-small pw-muted">Sample · 2 days ago</div></td><td></td><td class="pw-actions"><button class="pw-btn danger-outline sm">Sign out</button></td></tr></tbody></table></div>`)}
+${sec('theme','Theme','Choose how the app looks.',`<div class="pw-row"><div class="pw-seg"><button aria-pressed="true">${i('sun',14)} Light</button><button aria-pressed="false">${i('moon',14)} Dark</button><button aria-pressed="false">System</button></div></div>`)}
+${sec('monitoring','Monitoring preferences','Applies once real monitoring exists.',`<div class="pw-grid pw-g3" style="gap:16px">${P.field('Check interval','<select class="pw-select"><option>60 seconds</option></select>')}${P.field('Timeout','<select class="pw-select"><option>5 seconds</option></select>')}${P.field('Offline threshold','<select class="pw-select"><option>3 missed checks</option></select>','Machine becomes Stale, then Unreachable')}</div>`)}
+${sec('zerotier','ZeroTier integration','Placeholder — no connection.',`<div class="pw-row pw-between">${P.badge('notconn')}</div><div class="pw-grid pw-g2" style="gap:16px">${P.field('Network ID','<input class="pw-input pw-mono" placeholder="Not configured" disabled>')}${P.field('API token','<input class="pw-input pw-mono" placeholder="Never shown here" disabled>','Secrets are never displayed or stored in this prototype')}</div>`)}
+${sec('notif','Notification preferences','Channels are not connected yet.',`<div class="pw-row pw-between"><span>Email alerts</span><button class="pw-toggle" aria-label="email"></button></div><div class="pw-row pw-between"><span>Telegram alerts ${P.badge('soon')}</span><button class="pw-toggle" aria-label="tg"></button></div>`)}
+${sec('auto','Automation preferences','n8n and Telegram placeholders.',`<div class="pw-grid pw-g2" style="gap:16px">${P.field('n8n webhook URL','<input class="pw-input pw-mono" placeholder="Not configured" disabled>')}${P.field('Telegram bot','<input class="pw-input pw-mono" placeholder="Not configured" disabled>')}</div>`)}
+</div></div>`;
+document.getElementById('r').innerHTML=P.shell('settings','Settings','Account, monitoring and integrations',content);
+</script>

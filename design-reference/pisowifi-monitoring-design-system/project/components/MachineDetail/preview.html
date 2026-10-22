@@ -1,0 +1,31 @@
+<!-- @dsCard group="Screens" height=1390 width=1360 subtitle="Overview plus four separate status blocks" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<div id="r"></div>
+<script>
+const P=PisoWiFi,i=P.icon,D=P.data;
+const blk=(ic,tone,title,badge,lines)=>`<div class="pw-card flat pw-stack" style="gap:10px"><div class="pw-row"><span class="pw-stat-ic ${tone}">${i(ic,19)}</span><div class="pw-grow pw-h3">${title}</div></div>${badge}<div class="pw-small pw-muted">${lines}</div></div>`;
+const content=`
+<div class="pw-banner info">${i('info')}<div><strong>Demo data.</strong> ZeroTier status, admin reachability and internet verification are independent. A recent ZeroTier sighting never means the internet is verified.</div></div>
+<div class="pw-card"><div class="pw-row pw-between pw-wrap"><div class="pw-row" style="gap:14px"><span class="pw-stat-ic" style="width:52px;height:52px;border-radius:var(--radius-lg)">${i('wifi',26)}</span><div><h2 class="pw-h2">PisoWiFi 01</h2><div class="pw-muted">Location not set (demo) · WiFi5Soft v3.5.84</div></div></div>
+<div class="pw-row pw-wrap"><button class="pw-btn secondary">${i('edit')}Edit machine</button><button class="pw-btn primary">${i('shield')}Remote admin</button></div></div>
+<dl class="pw-kv" style="margin:20px 0 0;grid-template-columns:repeat(2,150px minmax(0,1fr));gap:12px 16px">
+<dt>Device ID</dt><dd class="pw-mono">demo-m1-0001</dd><dt>ZeroTier IP</dt><dd class="pw-mono">192.168.194.82</dd>
+<dt>Admin path</dt><dd class="pw-mono">/admin</dd><dt>Connection status</dt><dd>${P.badge('reachable')}</dd>
+<dt>Last seen</dt><dd>1 min ago</dd><dt>Last successful HTTP check</dt><dd>1 min ago</dd></dl></div>
+<div class="pw-grid pw-g4" style="gap:16px">
+${blk('network','','ZeroTier status',P.badge('recent'),'Member seen by ZeroTier 1 min ago. Placeholder — not connected to ZeroTier.')}
+${blk('shield','ok','Admin interface',P.badge('reachable'),'GET /admin answered in 41 ms (sample). WiFi5Soft login still required.')}
+${blk('globe','warn','Internet verification',P.badge('inet'),'No internet check configured for this machine yet.')}
+${blk('pulse','','Monitoring state',P.badge('enabled','Monitoring on'),'Every 60 s · timeout 5 s · offline after 3 misses (demo settings).')}
+</div>
+<div class="pw-grid pw-g-main">
+<div class="pw-stack" style="gap:24px">
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Monitoring summary</h2>${P.badge('sample')}</div>
+<div class="pw-grid pw-g3" style="gap:16px;margin-bottom:16px"><div><div class="pw-label">Uptime 14 d</div><div class="pw-kpi">99.4%</div></div><div><div class="pw-label">Avg response</div><div class="pw-kpi">46 ms</div></div><div><div class="pw-label">Outages</div><div class="pw-kpi">2</div></div></div>
+${P.line({w:760,h:200,labels:D.days,min:30,max:70,ticks:4,unit:' ms',series:[{v:D.rt1,cls:'l1',area:true}],alt:'Sample response time'})}</div>
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Recent events</h2><a href="#" style="font-weight:600">Open history</a></div>${P.eventList(4)}</div></div>
+<div class="pw-stack" style="gap:24px"><div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Machine actions</h2><div class="pw-stack" style="gap:8px">
+<button class="pw-btn primary block">${i('shield')}Open Remote Administration</button><button class="pw-btn secondary block">${i('refresh')}Run check now (demo)</button><button class="pw-btn secondary block">${i('edit')}Edit machine</button><button class="pw-btn danger-outline block">${i('trash')}Delete machine</button></div></div>
+<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Status states</h2><div class="pw-stack" style="gap:8px">${['reachable','unreachable','recent','stale','unknown','error','inet'].map(k=>P.badge(k)).join('')}</div></div></div></div>`;
+document.getElementById('r').innerHTML=P.shell('detail','PisoWiFi 01','Machines / PisoWiFi 01',content);
+</script>

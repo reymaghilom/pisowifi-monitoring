@@ -1,0 +1,3 @@
+/* PisoWiFi Monitoring - font references (no font files are bundled).
+   Inter for UI text, JetBrains Mono for IPs, paths and IDs. Families and fallbacks are in project/tokens.json -> type.families. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");

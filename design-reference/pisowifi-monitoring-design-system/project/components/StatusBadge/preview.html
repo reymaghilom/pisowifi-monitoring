@@ -1,0 +1,19 @@
+<!-- @dsCard group="Components" height=420 subtitle="Every state is a word + an icon + a colour" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<div id="r" style="padding:24px"></div>
+<script>
+const P=PisoWiFi;
+const row=(k,desc)=>`<tr><td style="width:240px">${P.badge(k)}</td><td class="pw-muted">${desc}</td></tr>`;
+document.getElementById('r').innerHTML=`<div class="pw-tablewrap"><table class="pw-table"><thead><tr><th>Badge</th><th>Meaning</th></tr></thead><tbody>
+${row('reachable','Admin interface answered the last HTTP check.')}
+${row('unreachable','The last HTTP check failed or timed out.')}
+${row('recent','ZeroTier saw the member recently. Says nothing about internet.')}
+${row('stale','No fresh data inside the offline threshold.')}
+${row('unknown','Never checked, or machine not configured yet.')}
+${row('error','The monitor itself failed — not the machine.')}
+${row('inet','Internet reachability has not been verified for this machine.')}
+${row('soon','Planned module; no integration exists yet.')}
+${row('notconn','Integration placeholder without credentials or link.')}
+${row('demo','Mock data. Shown on every screen of the prototype.')}
+</tbody></table></div>`;
+</script>

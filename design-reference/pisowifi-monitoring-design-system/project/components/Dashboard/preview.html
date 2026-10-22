@@ -1,0 +1,32 @@
+<!-- @dsCard group="Screens" height=1295 width=1360 subtitle="Summary cards, overview chart, machines, events, quick actions" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<div id="r"></div>
+<script>
+const P=PisoWiFi,i=P.icon,D=P.data;
+const mcard=m=>`<div class="pw-card flat pw-stack" style="gap:12px"><div class="pw-row pw-between"><div><div class="pw-h3">${m.name}</div><div class="pw-small pw-muted">${m.loc}</div></div>${P.badge(m.status)}</div>
+<div class="pw-mono pw-muted">${m.ip}${m.path}</div>
+<div class="pw-row pw-between"><span class="pw-small pw-muted">Last successful check · ${m.ok}</span></div>
+<div class="pw-row" style="gap:8px"><a class="pw-btn secondary sm" href="#">${i('pulse',16)}Details</a><a class="pw-btn secondary sm" href="#">${i('shield',16)}Remote admin</a></div></div>`;
+const content=`
+<div class="pw-banner info">${i('info')}<div><strong>Demo data.</strong> Numbers, events and charts below are samples for the design prototype. Nothing is measured from real machines.</div></div>
+<div class="pw-grid pw-g4" style="gap:16px">
+${P.kpi('server','','Total machines','2','Registered · demo')}
+${P.kpi('check','ok','Reachable','1','PisoWiFi 01')}
+${P.kpi('x','bad','Unreachable','0','No failed checks right now')}
+${P.kpi('alert','warn','Need verification','1','PisoWiFi 02 · stale')}
+</div>
+<div class="pw-grid pw-g-main">
+<div class="pw-stack" style="gap:24px">
+<div class="pw-card"><div class="pw-card-head"><div><h2 class="pw-h2">Monitoring overview</h2><div class="pw-small pw-muted">Measured uptime · last 14 days</div></div><div class="pw-row">${P.badge('sample')}<div class="pw-seg"><button aria-pressed="false">24 h</button><button aria-pressed="true">14 d</button><button aria-pressed="false">30 d</button></div></div></div>
+<div class="pw-grid pw-g3" style="gap:16px;margin-bottom:12px"><div><div class="pw-label">Measured uptime</div><div class="pw-kpi">99.4%</div></div><div><div class="pw-label">PisoWiFi 02</div><div class="pw-kpi">97.9%</div></div><div><div class="pw-label">Checks counted</div><div class="pw-kpi">${P.badge('nodata')}</div></div></div>
+${P.line({w:760,h:250,labels:D.days,min:94,max:100,ticks:3,unit:'%',series:[{v:D.up1,cls:'l1',area:true},{v:D.up2,cls:'l2'}]})}
+<div class="pw-legend" style="margin-top:8px"><span><i></i>PisoWiFi 01</span><span><i class="d2"></i>PisoWiFi 02</span></div></div>
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Quick machines</h2><a href="#" style="font-weight:600">View all</a></div><div class="pw-grid pw-g2" style="gap:16px">${D.machines.map(mcard).join('')}</div></div>
+</div>
+<div class="pw-stack" style="gap:24px">
+<div class="pw-card"><div class="pw-card-head"><h2 class="pw-h2">Recent events</h2>${P.badge('demo')}</div>${P.eventList(5)}</div>
+<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Quick actions</h2><div class="pw-stack" style="gap:8px">
+<button class="pw-btn primary block">${i('plus')}Add machine</button><button class="pw-btn secondary block">${i('refresh')}Run check now (demo)</button><button class="pw-btn secondary block">${i('shield')}Open Remote Administration</button><button class="pw-btn secondary block">${i('download')}Export history (CSV)</button></div></div>
+</div></div>`;
+document.getElementById('r').innerHTML=P.shell('dash','Dashboard','Overview of your registered PisoWiFi machines',content,'<button class="pw-btn primary">'+i('plus')+'Add machine</button>');
+</script>

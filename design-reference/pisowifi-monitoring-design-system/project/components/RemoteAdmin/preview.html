@@ -1,0 +1,36 @@
+<!-- @dsCard group="Screens" height=2140 width=1360 subtitle="Prototype only — never fakes WiFi5Soft access" -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<div id="r"></div>
+<script>
+const P=PisoWiFi,i=P.icon,D=P.data;
+const stepper=(st)=>{const lab=['Check ZeroTier path','Reach admin interface','Open secure session','Hand off to WiFi5Soft login'];
+return '<div class="pw-stepper">'+lab.map((l,n)=>{const s=st[n];return `<div class="pw-step"><span class="pw-step-dot ${s}">${s==='ok'?i('check',14):s==='bad'?i('x',14):n+1}</span><div><div style="font-weight:600">${l}</div><div class="pw-small pw-muted">${s==='ok'?'Done (simulated)':s==='now'?'In progress…':s==='bad'?'Failed (simulated)':'Waiting'}</div></div></div>`}).join('')+'</div>'};
+const panel=(kind)=>{
+const M={
+prep:['info','refresh','Preparing secure connection…','Opening a gateway to PisoWiFi 01. This is a simulation.',stepper(['ok','now','','']),''],
+ready:['ok','shield','Ready to open remote admin','Secure session prepared for 192.168.194.82/admin (simulated).',stepper(['ok','ok','ok','ok']),`<button class="pw-btn primary">${i('external')}Open Remote Admin</button>`],
+unavail:['bad','x','Machine unavailable','PisoWiFi 02 did not answer the last admin check.',stepper(['ok','bad','','']),`<button class="pw-btn secondary">${i('refresh')}Retry</button>`],
+retry:['warn','refresh','Still trying… (attempt 2 of 3)','The first attempt timed out. Retrying in 8 s.',stepper(['ok','now','','']),`<button class="pw-btn secondary">Cancel</button>`],
+unauth:['bad','lock','Not authorized','Your account cannot open remote admin for this machine. Ask the owner for access.',stepper(['bad','','','']),`<button class="pw-btn secondary">Back to machines</button>`]}[kind];
+return `<div class="pw-card pw-stack"><div class="pw-row"><span class="pw-ev-ic ${M[0]}" style="width:44px;height:44px">${kind==='prep'||kind==='retry'?`<span class="pw-spin"></span>`:i(M[1],20)}</span><div><h3 class="pw-h2">${M[2]}</h3><div class="pw-muted">${M[3]}</div></div></div>${M[4]}<div class="pw-row">${M[5]}</div></div>`};
+const content=`
+<div class="pw-banner warn" role="note">${i('alert')}<div><strong>Prototype only — not operational yet.</strong> This screen does not connect to any machine. When built, the original <strong>WiFi5Soft login will still be required</strong>; Monitor never stores or bypasses admin credentials.</div></div>
+<div class="pw-grid pw-g-main" style="align-items:start">
+<div class="pw-stack" style="gap:24px">
+<div class="pw-card pw-stack"><div class="pw-card-head" style="margin:0"><h2 class="pw-h2">Select machine</h2>${P.badge('demo')}</div>
+<div class="pw-grid pw-g2" style="gap:16px">
+${D.machines.map((m,n)=>`<div class="pw-card flat pw-stack" style="gap:10px;${n===0?'border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)':''}"><div class="pw-row pw-between"><div class="pw-h3">${m.name}</div>${P.badge(m.status)}</div><div class="pw-mono pw-muted">${m.ip}${m.path}</div><button class="pw-btn ${n===0?'primary':'secondary'} sm">${i('shield',16)}${n===0?'Selected':'Select'}</button></div>`).join('')}</div></div>
+<div class="pw-card pw-stack"><div class="pw-card-head" style="margin:0"><h2 class="pw-h2">Remote Administration · PisoWiFi 01</h2><span class="pw-row" style="gap:6px"><span class="pw-badge ok">${i('check',14)}Connection indicator: ready (simulated)</span></span></div>
+<div class="pw-browser"><div class="pw-browser-bar"><span class="pw-row" style="gap:6px"><i style="width:10px;height:10px;border-radius:50%;background:var(--border-strong)"></i><i style="width:10px;height:10px;border-radius:50%;background:var(--border-strong)"></i><i style="width:10px;height:10px;border-radius:50%;background:var(--border-strong)"></i></span><div class="pw-browser-url">${i('lock',14)}<span class="pw-mono">gateway.example/pisowifi-01/admin</span></div></div>
+<div style="padding:56px 24px;display:grid;place-items:center;background:var(--surface-2)"><div class="pw-card" style="width:100%;max-width:340px;text-align:center" ><div class="pw-stack" style="gap:12px;align-items:center"><span class="pw-badge mute">Placeholder panel</span><h3 class="pw-h2">WiFi5Soft admin login</h3><p class="pw-muted" style="font-size:13px">The real WiFi5Soft sign-in page would appear here. This prototype shows no real fields and never fakes access.</p><div class="pw-skel" style="width:100%;height:40px"></div><div class="pw-skel" style="width:100%;height:40px"></div><div class="pw-skel" style="width:60%;height:40px"></div></div></div></div></div>
+<div class="pw-row"><button class="pw-btn primary">${i('external')}Open Remote Admin</button><button class="pw-btn secondary">${i('refresh')}Re-check connection</button></div></div>
+</div>
+<div class="pw-stack" style="gap:24px">
+<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Selected machine</h2><dl class="pw-kv" style="margin:0;grid-template-columns:110px minmax(0,1fr)"><dt>Name</dt><dd>PisoWiFi 01</dd><dt>Software</dt><dd>WiFi5Soft v3.5.84</dd><dt>Target</dt><dd class="pw-mono">192.168.194.82/admin</dd><dt>Admin check</dt><dd>${P.badge('reachable')}</dd></dl></div>
+<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:12px">Secure session</h2><dl class="pw-kv" style="margin:0;grid-template-columns:110px minmax(0,1fr)"><dt>Transport</dt><dd>VPS + ZeroTier gateway ${P.badge('soon')}</dd><dt>Session</dt><dd>Not started</dd><dt>Expires</dt><dd>—</dd><dt>Credentials</dt><dd>Never stored</dd></dl></div>
+<div class="pw-card"><h2 class="pw-h2" style="margin-bottom:8px">Troubleshooting</h2><ul class="pw-muted" style="margin:0;padding-left:18px;font-size:13px;line-height:22px"><li>Confirm the machine is joined to the ZeroTier network.</li><li>Check that the status is Reachable, not Stale.</li><li>Make sure the path is /admin.</li><li>Still stuck? Open the history page to see the last failed check.</li></ul></div>
+</div></div>
+<h2 class="pw-h2">Connection states</h2>
+<div class="pw-grid pw-g3" style="gap:16px;align-items:start">${panel('prep')}${panel('ready')}${panel('unavail')}${panel('retry')}${panel('unauth')}</div>`;
+document.getElementById('r').innerHTML=P.shell('remote','Remote Administration','Prototype only · not operational yet',content);
+</script>
