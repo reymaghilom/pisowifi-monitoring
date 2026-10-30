@@ -36,7 +36,7 @@ The system allows me to check whether my machines are **Online (Reachable)** or 
 
 | Category | Technologies |
 |---|---|
-| Frontend | Next.js, React, TypeScript, Tailwind CSS |
+| Frontend | React, TypeScript, Tailwind CSS |
 | Backend | Node.js, Fastify |
 | Database | PostgreSQL, Supabase, Drizzle ORM |
 | Automation | n8n, Gmail |
